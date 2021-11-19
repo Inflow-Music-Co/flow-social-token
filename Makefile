@@ -1,7 +1,7 @@
-all: demo
-.PHONY: demo
-demo: 
-	go run ./demo/main.go
+all: storyline
+.PHONY: storyline
+storyline: 
+	go run ./storyline/main.go
 
 .PHONY: event
 event:
