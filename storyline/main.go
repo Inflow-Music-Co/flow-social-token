@@ -16,7 +16,8 @@ func main() {
 
 	g := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	g.TransactionFromFile("setup_account").SignProposeAndPayAs("account").RunPrintEventsFull()
+	g.TransactionFromFile("setup_st_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
+	g.TransactionFromFile("deposit_st_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	// g.TransactionFromFile("mint_tokens").SignProposeAndPayAs("account").AccountArgument("first").UFix64Argument("33.0").RunPrintEventsFull()
 

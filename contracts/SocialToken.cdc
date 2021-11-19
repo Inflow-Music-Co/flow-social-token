@@ -20,6 +20,9 @@ pub contract SocialToken: FungibleToken {
     /// The event that is emitted when tokens are destroyed
     pub event TokensBurned(amount: UFix64)
 
+    // The storage path for the admin resource
+    pub let AdminStoragePath: StoragePath
+
     // The storage Path for minters' MinterProxy
     pub let MinterProxyStoragePath: StoragePath
 
@@ -27,7 +30,7 @@ pub contract SocialToken: FungibleToken {
     pub let MinterProxyPublicPath: PublicPath
 
     /// The event that is emitted when a new minter resource is created
-    pub event MinterCreated(allowedAmount: UFix64)
+    pub event MinterCreated()
 
     /// The event that is emitted when a new burner resource is created
     pub event BurnerCreated()
@@ -109,8 +112,7 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Minter {
 
-        /// The amount of tokens that the minter is allowed to mint
-        pub var allowedAmount: UFix64
+        //@TODO allowed amount that's returned from a quote function 
 
         /// mintTokens
         ///
@@ -120,17 +122,12 @@ pub contract SocialToken: FungibleToken {
         pub fun mintTokens(amount: UFix64): @SocialToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
-                amount <= self.allowedAmount: "Amount minted must be less than the allowed amount"
             }
             SocialToken.totalSupply = SocialToken.totalSupply + amount
-            self.allowedAmount = self.allowedAmount - amount
             emit TokensMinted(amount: amount)
             return <-create Vault(balance: amount)
         }
 
-        init(allowedAmount: UFix64) {
-            self.allowedAmount = allowedAmount
-        }
     }
 
     pub resource interface MinterProxyPublic {
@@ -197,9 +194,9 @@ pub contract SocialToken: FungibleToken {
         ///
         /// Function that creates and returns a new minter resource
         ///
-        pub fun createNewMinter(allowedAmount: UFix64): @Minter {
-            emit MinterCreated(allowedAmount: allowedAmount)
-            return <-create Minter(allowedAmount: allowedAmount)
+        pub fun createNewMinter(): @Minter {
+            emit MinterCreated()
+            return <-create Minter()
         }
 
         /// createNewBurner
@@ -214,8 +211,9 @@ pub contract SocialToken: FungibleToken {
 
     init() {
         self.totalSupply = 1000.0
-        self.MinterProxyPublicPath = /public/fusdMinterProxy
-        self.MinterProxyStoragePath = /storage/fusdMinterProxy
+        self.AdminStoragePath = /storage/socialTokenAdmin
+        self.MinterProxyPublicPath = /public/socialTokenMinterProxy
+        self.MinterProxyStoragePath = /storage/socialTokenMinterProxy
 
         // Create the Vault with the total supply of tokens and save it in storage
         //
