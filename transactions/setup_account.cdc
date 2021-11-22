@@ -1,7 +1,7 @@
 
 // This transaction is a template for a transaction
 // to add a Vault resource to their account
-// so that they can use the exampleToken
+// so that they can use the SocialToken
 
 import FungibleToken from 0xf8d6e0586b0a20c7
 import SocialToken from 0xf8d6e0586b0a20c7

@@ -225,7 +225,7 @@ pub contract SocialToken: FungibleToken {
         //
         self.account.link<&{FungibleToken.Receiver}>(
             /public/socialTokenReceiver,
-            target: /storage/socialTokenVault
+            target: /storage/socialTokenReceiver
         )
 
         // Create a public capability to the stored Vault that only exposes

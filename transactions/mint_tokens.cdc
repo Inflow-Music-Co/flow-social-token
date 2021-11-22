@@ -1,26 +1,28 @@
 import FungibleToken from 0xf8d6e0586b0a20c7
-import ExampleToken from 0xf8d6e0586b0a20c7
+import SocialToken from 0xf8d6e0586b0a20c7
 
 transaction(recipient: Address, amount: UFix64) {
-    let tokenAdmin: &ExampleToken.Administrator
+
+    let minterProxy: &SocialToken.MinterProxy
     let tokenReceiver: &{FungibleToken.Receiver}
 
     prepare(signer: AuthAccount) {
-        self.tokenAdmin = signer.borrow<&ExampleToken.Administrator>(from: /storage/exampleTokenAdmin)
-            ?? panic("Signer is not the token admin")
+
+        //initialise variables
+        self.minterProxy = signer
+            .borrow<&SocialToken.MinterProxy>(from: SocialToken.MinterProxyStoragePath)
+            ?? panic ("could not borrow minter proxy from signer")
 
         self.tokenReceiver = getAccount(recipient)
-            .getCapability(/public/exampleTokenReceiver)
+            .getCapability(/public/socialTokenReceiver)!
             .borrow<&{FungibleToken.Receiver}>()
             ?? panic("Unable to borrow receiver reference")
+
     }
 
     execute {
-        let minter <- self.tokenAdmin.createNewMinter(allowedAmount: amount)
-        let mintedVault <- minter.mintTokens(amount: amount)
+        let mintedVault <- self.minterProxy.mintTokens(amount: amount)
 
-        self.tokenReceiver.deposit(from: <-mintedVault)
-
-        destroy minter
+        self.tokenReceiver.deposit(from: <- mintedVault)
     }
 }
