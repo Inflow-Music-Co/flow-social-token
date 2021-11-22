@@ -31,12 +31,13 @@ transaction(minterAddress: Address) {
 
         // Create a new minter resource and a private link to a capability for it in the admin's storage.
         let minter <- tokenAdmin.createNewMinter()
+        
         adminAccount.save(<- minter, to: self.resourceStoragePath)
+        
         self.minterCapability = adminAccount.link<&SocialToken.Minter>(
             self.capabilityPrivatePath,
             target: self.resourceStoragePath
         ) ?? panic("Could not link minter")
-
     }
 
     execute {

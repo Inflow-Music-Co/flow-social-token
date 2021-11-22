@@ -5,8 +5,14 @@ pub contract SocialToken: FungibleToken {
     /// Total supply of ExampleTokens in existence
     pub var totalSupply: UFix64
 
+    /// Minimum required FUSD to mint new tokens
+    pub var mintQuote: UFix64
+
     /// The event that is emitted when the contract is created
     pub event TokensInitialized(initialSupply: UFix64)
+
+    /// The event that is emitted when a mintQuote is calculate
+    pub event MintQuoteCalculated(quote: UFix64)
 
     /// The event that is emitted when tokens are withdrawn from a Vault
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
@@ -20,6 +26,12 @@ pub contract SocialToken: FungibleToken {
     /// The event that is emitted when tokens are destroyed
     pub event TokensBurned(amount: UFix64)
 
+     /// The event that is emitted when a new minter resource is created
+    pub event MinterCreated()
+
+    /// The event that is emitted when a new burner resource is created
+    pub event BurnerCreated()
+
     // The storage path for the admin resource
     pub let AdminStoragePath: StoragePath
 
@@ -29,11 +41,13 @@ pub contract SocialToken: FungibleToken {
     // The public path for minters' MinterProxy capability
     pub let MinterProxyPublicPath: PublicPath
 
-    /// The event that is emitted when a new minter resource is created
-    pub event MinterCreated()
+    // The storage Path for minters' MinterProxy
+    pub let BurnerProxyStoragePath: StoragePath
 
-    /// The event that is emitted when a new burner resource is created
-    pub event BurnerCreated()
+    // The public path for minters' MinterProxy capability
+    pub let BurnerProxyPublicPath: PublicPath
+
+   
 
     /// Vault
     ///
@@ -112,7 +126,11 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Minter {
 
-        //@TODO allowed amount that's returned from a quote function 
+        pub var quote: UFix64
+
+        pub fun calculateMintQuote(amount: UFix64): UFix64 {
+            return amount * SocialToken.mintQuote
+        }
 
         /// mintTokens
         ///
@@ -124,8 +142,16 @@ pub contract SocialToken: FungibleToken {
                 amount > 0.0: "Amount minted must be greater than zero"
             }
             SocialToken.totalSupply = SocialToken.totalSupply + amount
+
+            self.quote = self.calculateMintQuote(amount: amount)
+            emit MintQuoteCalculated(quote: self.quote)
+
             emit TokensMinted(amount: amount)
             return <-create Vault(balance: amount)
+        }
+
+        init() {
+            self.quote = 0.0
         }
 
     }
@@ -188,6 +214,41 @@ pub contract SocialToken: FungibleToken {
         }
     }
 
+    pub resource interface BurnerProxyPublic {
+        pub fun setBurnerCapability(cap: Capability<&Burner>)
+    }
+
+    pub resource BurnerProxy: BurnerProxyPublic {
+
+        //access(self) so nobody else can copy the capability and use it.
+        access(self) var burnerCapability: Capability<&Burner>?
+
+        // Anyone can call this, but only the admin can create Burner capabilities,
+        // so the type system constrains this to being called by the admin.
+        pub fun setBurnerCapability(cap: Capability<&Burner>) {
+            self.burnerCapability = cap
+        }
+
+        pub fun burnTokens(from: @FungibleToken.Vault) {
+            self.burnerCapability!.borrow()!.burnTokens(from: <- from)
+        }
+
+        init() {
+            self.burnerCapability = nil
+        }
+    }
+
+    // createBurnerProxy
+    //
+    // Function that creates a BurnerProxy.
+    // Anyone can call this, but the BurnerProxy cannot mint without a Burner capability,
+    // and only the admin can provide that.
+    //
+
+    pub fun createBurnerProxy(): @BurnerProxy {
+        return <- create BurnerProxy()
+    }
+
     pub resource Administrator {
 
         /// createNewMinter
@@ -211,9 +272,14 @@ pub contract SocialToken: FungibleToken {
 
     init() {
         self.totalSupply = 1000.0
+        self.mintQuote = 2.0
         self.AdminStoragePath = /storage/socialTokenAdmin
+        
         self.MinterProxyPublicPath = /public/socialTokenMinterProxy
         self.MinterProxyStoragePath = /storage/socialTokenMinterProxy
+        
+        self.BurnerProxyPublicPath = /public/socialTokenBurnerProxy
+        self.BurnerProxyStoragePath = /storage/socialTokenBurnerProxy
 
         // Create the Vault with the total supply of tokens and save it in storage
         //

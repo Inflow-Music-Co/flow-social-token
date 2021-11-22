@@ -21,6 +21,13 @@
 				"emulator": "0xee82856bf20e2aa6",
 				"testnet": "0x9a0766d93b6608b7"
 			}
+		},
+		"FUSD": {
+			"source": "./contracts/FUSD.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79",
+				"testnet": "0x7e60df042a9c0868"
+			}
 		}
 	},
 	"networks": {
@@ -59,7 +66,7 @@
 			"emulator-account": [
 				"FungibleToken",
 				"SocialToken",
-				"Debug"
+				"FUSD"
 			],
 			"emulator-first": [],
 			"emulator-second": []
