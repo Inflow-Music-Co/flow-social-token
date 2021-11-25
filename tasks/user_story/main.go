@@ -78,6 +78,13 @@ func main() {
 	//script returns social balance after burn for account first
 	resultAccountEnd := g.ScriptFromFile("get_social_balance").AccountArgument("first").RunFailOnError()
 	log.Printf("Script returned %s", resultAccountEnd)
+
+	//-------------------------------------------------//
+	//--------- EXPERIMENTAL --------------------------//
+	//-------------------------------------------------//
+
+	mintQuote := g.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()
+	log.Printf(" ------ MINT QUOTE ----- %s", mintQuote)
 	
 
 }

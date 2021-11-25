@@ -16,7 +16,7 @@ func main() {
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	result := flow.ScriptFromFile("get_mint_quote").UFix64Argument("2.0").RunFailOnError()
+	result := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("2.0").RunFailOnError()
 	log.Printf("Script returned %s", result)
 
 }

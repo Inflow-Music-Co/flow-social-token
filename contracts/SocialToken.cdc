@@ -121,6 +121,10 @@ pub contract SocialToken: FungibleToken {
         return <-create Vault(balance: 0.0)
     }
 
+    pub fun getMintQuote(amount: UFix64): UFix64 {
+        return amount * SocialToken.mintQuote
+    }
+
     /// Minter
     ///
     /// Resource object that token admin accounts can hold to mint new tokens.
@@ -174,8 +178,8 @@ pub contract SocialToken: FungibleToken {
 
         pub fun mintTokens(amount: UFix64): @SocialToken.Vault {
             return <- self.minterCapability!
-            .borrow()!
-            .mintTokens(amount: amount)
+                .borrow()!
+                .mintTokens(amount: amount)
         }
 
         init() {
@@ -302,6 +306,8 @@ pub contract SocialToken: FungibleToken {
             /public/socialTokenBalance,
             target: /storage/socialTokenVault
         )
+
+
 
         let admin <- create Administrator()
         self.account.save(<-admin, to: /storage/socialTokenAdmin)
