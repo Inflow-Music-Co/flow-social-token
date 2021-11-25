@@ -48,7 +48,25 @@ pub contract SocialToken: FungibleToken {
     // The public path for minters' MinterProxy capability
     pub let BurnerProxyPublicPath: PublicPath
 
-   
+   pub struct FUSDPool {
+        // The receiver for the FUSD Collateral.
+        // Note that we do not store an address to find the Vault that this represents,
+        // as the link or resource that we fetch in this way may be manipulated,
+        // so to find the address that a cut goes to you must get this struct and then
+        // call receiver.borrow()!.owner.address on it.
+        // This can be done efficiently in a script.
+        pub let receiver: Capability<&{FungibleToken.Receiver}>
+
+        // The amount of the payment FungibleToken that will be paid to the receiver.
+        pub let amount: UFix64
+
+        // initializer
+        //
+        init(receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
+            self.receiver = receiver
+            self.amount = amount
+        }
+    }
 
     /// Vault
     ///
@@ -131,6 +149,8 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Minter {
 
+        pub let pool: FUSDPool
+
         pub fun calculateMintQuote(amount: UFix64): UFix64 {
             return amount * SocialToken.mintQuote
         }
@@ -140,7 +160,7 @@ pub contract SocialToken: FungibleToken {
         /// Function that mints new tokens, adds them to the total supply,
         /// and returns them to the calling context.
         ///
-        pub fun mintTokens(amount: UFix64, fusdAmount: UFix64, fusdVault: @FUSD.Vault): @SocialToken.Vault? {
+        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault): @SocialToken.Vault? {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
             }
@@ -150,16 +170,20 @@ pub contract SocialToken: FungibleToken {
             SocialToken.mintQuote = self.calculateMintQuote(amount: amount)
             emit MintQuoteCalculated(quote: SocialToken.mintQuote)
 
-            if(fusdAmount == SocialToken.mintQuote){
-                // yay
-                destroy fusdVault
+            if(fusdPayment.balance == SocialToken.mintQuote){
+                let reciever = self.pool.reciever.borrow()
+                let payment <- fusdPayment.withdraw(amount: fusdPayment.balance)
+                reciever.deposit(from: <- payment)
                 emit TokensMinted(amount: amount)
                 return <-create Vault(balance: amount)
             } 
             
-            destroy fusdVault
+            destroy fusdPayment
             panic("could not mint tokens, fusd not equal to mint quote")
-        
+        }
+
+        init() {
+            self.pool = pool
         }
     }
 
@@ -178,10 +202,10 @@ pub contract SocialToken: FungibleToken {
             self.minterCapability = cap
         }
 
-        pub fun mintTokens(amount: UFix64, fusdAmount: UFix64, fusdVault: @FUSD.Vault): @SocialToken.Vault? {
+        pub fun mintTokens(amount: UFix64, fusdPayment: @FUSD.Vault): @SocialToken.Vault? {
             return <- self.minterCapability!
                 .borrow()!
-                .mintTokens(amount: amount, fusdAmount: fusdAmount, fusdVault: <- fusdVault)
+                .mintTokens(amount: amount, fusdPayment: <- fusdPayment)
         }
 
         init() {
