@@ -65,8 +65,9 @@
 		"emulator": {
 			"emulator-account": [
 				"FungibleToken",
-				"SocialToken",
-				"FUSD"
+				"FUSD",
+				"SocialToken"
+				
 			],
 			"emulator-first": [],
 			"emulator-second": []

@@ -12,4 +12,9 @@ event:
 mint-quote:
 	go run ./tasks/get_mint_quote/main.go
 
+.PHONY: mint-fusd
+mint-fusd:
+	go run ./tasks/mint_fusd/main.go
+
+
 
