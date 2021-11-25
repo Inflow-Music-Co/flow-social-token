@@ -80,7 +80,7 @@ func main() {
 	log.Printf("Script returned %s", resultAccountEnd)
 
 	//-------------------------------------------------//
-	//--------- EXPERIMENTAL --------------------------//
+	//------------ EXPERIMENTAL -----------------------//
 	//-------------------------------------------------//
 
 	mintQuote := g.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()

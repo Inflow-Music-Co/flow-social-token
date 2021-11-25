@@ -16,5 +16,9 @@ mint-quote:
 mint-fusd:
 	go run ./tasks/mint_fusd/main.go
 
+.PHONY: mint-with-collateral
+mint-with-collateral:
+	go run ./tasks/mint_with_collateral/main.go
+
 
 

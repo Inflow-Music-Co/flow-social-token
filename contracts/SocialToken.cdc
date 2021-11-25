@@ -131,8 +131,6 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Minter {
 
-        pub var quote: UFix64
-
         pub fun calculateMintQuote(amount: UFix64): UFix64 {
             return amount * SocialToken.mintQuote
         }
@@ -142,23 +140,27 @@ pub contract SocialToken: FungibleToken {
         /// Function that mints new tokens, adds them to the total supply,
         /// and returns them to the calling context.
         ///
-        pub fun mintTokens(amount: UFix64): @SocialToken.Vault {
+        pub fun mintTokens(amount: UFix64, fusdAmount: UFix64, fusdVault: @FUSD.Vault): @SocialToken.Vault? {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
             }
+            
             SocialToken.totalSupply = SocialToken.totalSupply + amount
 
-            self.quote = self.calculateMintQuote(amount: amount)
-            emit MintQuoteCalculated(quote: self.quote)
+            SocialToken.mintQuote = self.calculateMintQuote(amount: amount)
+            emit MintQuoteCalculated(quote: SocialToken.mintQuote)
 
-            emit TokensMinted(amount: amount)
-            return <-create Vault(balance: amount)
+            if(fusdAmount == SocialToken.mintQuote){
+                // yay
+                destroy fusdVault
+                emit TokensMinted(amount: amount)
+                return <-create Vault(balance: amount)
+            } 
+            
+            destroy fusdVault
+            panic("could not mint tokens, fusd not equal to mint quote")
+        
         }
-
-        init() {
-            self.quote = 0.0
-        }
-
     }
 
     pub resource interface MinterProxyPublic {
@@ -176,10 +178,10 @@ pub contract SocialToken: FungibleToken {
             self.minterCapability = cap
         }
 
-        pub fun mintTokens(amount: UFix64): @SocialToken.Vault {
+        pub fun mintTokens(amount: UFix64, fusdAmount: UFix64, fusdVault: @FUSD.Vault): @SocialToken.Vault? {
             return <- self.minterCapability!
                 .borrow()!
-                .mintTokens(amount: amount)
+                .mintTokens(amount: amount, fusdAmount: fusdAmount, fusdVault: <- fusdVault)
         }
 
         init() {
