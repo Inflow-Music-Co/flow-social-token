@@ -149,7 +149,7 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Minter {
 
-        pub let pool: FUSDPool
+        access(self) let pool: FUSDPool
 
         pub fun calculateMintQuote(amount: UFix64): UFix64 {
             return amount * SocialToken.mintQuote
@@ -171,9 +171,10 @@ pub contract SocialToken: FungibleToken {
             emit MintQuoteCalculated(quote: SocialToken.mintQuote)
 
             if(fusdPayment.balance == SocialToken.mintQuote){
-                let reciever = self.pool.reciever.borrow()
+                let receiver = self.pool.receiver.borrow()!
                 let payment <- fusdPayment.withdraw(amount: fusdPayment.balance)
-                reciever.deposit(from: <- payment)
+                receiver!.deposit(from: <- payment)
+                destroy fusdPayment
                 emit TokensMinted(amount: amount)
                 return <-create Vault(balance: amount)
             } 
@@ -182,7 +183,7 @@ pub contract SocialToken: FungibleToken {
             panic("could not mint tokens, fusd not equal to mint quote")
         }
 
-        init() {
+        init(pool: FUSDPool) {
             self.pool = pool
         }
     }
@@ -286,9 +287,9 @@ pub contract SocialToken: FungibleToken {
         ///
         /// Function that creates and returns a new minter resource
         ///
-        pub fun createNewMinter(): @Minter {
+        pub fun createNewMinter(pool: SocialToken.FUSDPool): @Minter {
             emit MinterCreated()
-            return <-create Minter()
+            return <-create Minter(pool: pool)
         }
 
         /// createNewBurner
