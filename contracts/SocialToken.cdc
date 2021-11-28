@@ -157,10 +157,11 @@ pub contract SocialToken: FungibleToken {
 
         /// mintTokens
         ///
-        /// Function that mints new tokens, adds them to the total supply,
-        /// and returns them to the calling context.
+        /// Function that mints new tokens, in exchange for fusdPayment. If Payment is equal to the quote 
+        /// FUSD Vault gets sent to administrator account 
+        /// and returns the minted SocialTokens to the calling context.
         ///
-        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault): @SocialToken.Vault? {
+        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
             }
@@ -177,10 +178,11 @@ pub contract SocialToken: FungibleToken {
                 destroy fusdPayment
                 emit TokensMinted(amount: amount)
                 return <-create Vault(balance: amount)
-            } 
+            }
             
-            destroy fusdPayment
-            panic("could not mint tokens, fusd not equal to mint quote")
+            log("could not mint tokens, fusd not equal to mint quote") 
+            return <- fusdPayment
+            
         }
 
         init(pool: FUSDPool) {
@@ -203,7 +205,7 @@ pub contract SocialToken: FungibleToken {
             self.minterCapability = cap
         }
 
-        pub fun mintTokens(amount: UFix64, fusdPayment: @FUSD.Vault): @SocialToken.Vault? {
+        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
             return <- self.minterCapability!
                 .borrow()!
                 .mintTokens(amount: amount, fusdPayment: <- fusdPayment)

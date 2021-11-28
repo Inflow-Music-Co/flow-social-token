@@ -30,7 +30,7 @@ transaction(minterAddress: Address) {
             ?? panic("Could not borrow a reference to the admin resource")
 
         // Create a new minter resource and a private link to a capability for it in the admin's storage.
-        let minter <- tokenAdmin.createNewMinter()
+        let minter <- tokenAdmin.createNewMinter(pool: SocialToken.FUSDPool)
         
         adminAccount.save(<- minter, to: self.resourceStoragePath)
         

@@ -16,13 +16,47 @@ func main() {
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
+	//FUSD// 
+
+	//Setup FUSD Vaults for both accounts
+	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull();
+	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull();
+
+	//First Account sets up FUSD Minter
+	flow.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull();
+
+	//Admin Account deposits minter into first account
+	flow.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
+
+	// First Account Mints and deposits in one transaction
+	flow.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull();
+
+	//Log balance
+	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
+	log.Printf("FUSD balance of account 'first account' %s", fusdFirstAccountBalance)
+
 	//-------------------------------------------------//
-	//------------ EXPERIMENTAL -----------------------//
+	//--------- SETUP AND MINT SOCIAL TOKEN -----------//
 	//-------------------------------------------------//
 
+	
+
+	//Setup SocialToken Vaults for both accounts
+	flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
+
+	//First Account sets up Social Minter
+	flow.TransactionFromFile("social_token/setup_social_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
+
+	//Admin Account deposits minter into first account
+	flow.TransactionFromFile("social_token/deposit_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
+
+	//Get the mintQoute for the specificed amount of socialTokens
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()
 	log.Printf(" ------ MINT QUOTE ----- %s", mintQuote)
 
-	flow.TransactionFromFile("social_token/setup_social_minterrr").SignProposeAndPayAs("account").RunPrintEventsFull()
+	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").AccountArgument("first").UFix64Argument("10.0000").RunPrintEventsFull()	
+
+
 
 }
