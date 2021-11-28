@@ -26,20 +26,19 @@ transaction(minterAddress: Address) {
         // These paths must be unique within the SocialToken contract account's storage
         self.resourceStoragePath = /storage/socialTokenAdminMinter
         self.capabilityPrivatePath = /private/socialTokenAdminMinter
-
+        
         // Get a reference to the signer's (admin) stored FUSD Reciever.
-        let receiverFUSDRef = adminAccount.getCapability(/public/fusdReceiver)!
-            .borrow<&{FungibleToken.Receiver}>()
-                ?? panic("Could not borrow receiver reference to the recipient's Vault")
+        let receiverFUSDRef = adminAccount.getCapability(/public/fusdReceiver).borrow<&{FungibleToken.Receiver}>()!
 
         // Create a reference to the admin resource in storage.
         let tokenAdmin = adminAccount.borrow<&SocialToken.Administrator>(from: SocialToken.AdminStoragePath)
             ?? panic("Could not borrow a reference to the admin resource")
-        
-        //Create an FUSD Pool Struct and set reciever to be admin FUSD Vault
-        let pool = SocialToken.FUSDPool(receiver: receiverFUSDRef)    
+
+        // call the constructor of the FUSD Pool Struct on SocialToken Contract
+        let pool = SocialToken.FUSDPool(receiver: receiverFUSDRef)!
 
         // Create a new minter resource and a private link to a capability for it in the admin's storage.
+        // use FUSDPool Constructor to initialise FUSD Pool with admin FUSD Reciever
         let minter <- tokenAdmin.createNewMinter(pool: pool)
         
         adminAccount.save(<- minter, to: self.resourceStoragePath)
