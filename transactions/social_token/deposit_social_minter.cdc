@@ -12,6 +12,8 @@
 // create a minter proxy in the minter account.
 
 import SocialToken from 0xf8d6e0586b0a20c7
+import FungibleToken from 0xf8d6e0586b0a20c7
+import FUSD from 0xf8d6e0586b0a20c7
 
 transaction(minterAddress: Address) {
 
@@ -25,12 +27,20 @@ transaction(minterAddress: Address) {
         self.resourceStoragePath = /storage/socialTokenAdminMinter
         self.capabilityPrivatePath = /private/socialTokenAdminMinter
 
+        // Get a reference to the signer's (admin) stored FUSD Reciever.
+        let receiverFUSDRef = adminAccount.getCapability(/public/fusdReceiver)!
+            .borrow<&{FungibleToken.Receiver}>()
+                ?? panic("Could not borrow receiver reference to the recipient's Vault")
+
         // Create a reference to the admin resource in storage.
         let tokenAdmin = adminAccount.borrow<&SocialToken.Administrator>(from: SocialToken.AdminStoragePath)
             ?? panic("Could not borrow a reference to the admin resource")
+        
+        //Create an FUSD Pool Struct and set reciever to be admin FUSD Vault
+        let pool = SocialToken.FUSDPool(receiver: receiverFUSDRef)    
 
         // Create a new minter resource and a private link to a capability for it in the admin's storage.
-        let minter <- tokenAdmin.createNewMinter(pool: SocialToken.FUSDPool)
+        let minter <- tokenAdmin.createNewMinter(pool: pool)
         
         adminAccount.save(<- minter, to: self.resourceStoragePath)
         

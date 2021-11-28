@@ -57,14 +57,14 @@ pub contract SocialToken: FungibleToken {
         // This can be done efficiently in a script.
         pub let receiver: Capability<&{FungibleToken.Receiver}>
 
-        // The amount of the payment FungibleToken that will be paid to the receiver.
-        pub let amount: UFix64
+        // The amount of the payment FungibleToken that will be paid to the receiver. use later 
+        // for splits
+        // pub let amount: UFix64
 
         // initializer
         //
-        init(receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
+        init(receiver: Capability<&{FungibleToken.Receiver}>) {
             self.receiver = receiver
-            self.amount = amount
         }
     }
 
