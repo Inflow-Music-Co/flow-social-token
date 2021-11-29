@@ -48,6 +48,8 @@ pub contract SocialToken: FungibleToken {
     // The public path for minters' MinterProxy capability
     pub let BurnerProxyPublicPath: PublicPath
 
+    pub var AdminPool: FUSDPool
+
    pub struct FUSDPool {
         // The receiver for the FUSD Collateral.
         // Note that we do not store an address to find the Vault that this represents,
@@ -307,8 +309,9 @@ pub contract SocialToken: FungibleToken {
     init() {
         self.totalSupply = 1000.0
         self.mintQuote = 2.0
+
+
         self.AdminStoragePath = /storage/socialTokenAdmin
-        
         self.MinterProxyPublicPath = /public/socialTokenMinterProxy
         self.MinterProxyStoragePath = /storage/socialTokenMinterProxy
         
@@ -336,7 +339,9 @@ pub contract SocialToken: FungibleToken {
             target: /storage/socialTokenVault
         )
 
-
+        self.AdminPool = FUSDPool(
+            receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
+            )
 
         let admin <- create Administrator()
         self.account.save(<-admin, to: /storage/socialTokenAdmin)
