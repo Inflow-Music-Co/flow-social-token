@@ -55,7 +55,7 @@ func main() {
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()
 	log.Printf(" ------ MINT QUOTE ----- %s", mintQuote)
 
-	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").AccountArgument("first").UFix64Argument("10.0000").RunPrintEventsFull()	
+	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()	
 
 
 

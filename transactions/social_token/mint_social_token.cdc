@@ -2,7 +2,7 @@ import FungibleToken from 0xf8d6e0586b0a20c7
 import SocialToken from 0xf8d6e0586b0a20c7
 import FUSD from 0xf8d6e0586b0a20c7
 
-transaction(recipient: Address, amount: UFix64) {
+transaction(socialTokenAmount: UFix64, fusdPayment: UFix64) {
 
 
     let paymentVault: @FungibleToken.Vault
@@ -17,20 +17,21 @@ transaction(recipient: Address, amount: UFix64) {
             .borrow<&SocialToken.MinterProxy>(from: SocialToken.MinterProxyStoragePath)
             ?? panic ("could not borrow minter proxy from signer")
 
-        self.tokenReceiver = getAccount(recipient)
+        self.tokenReceiver = signer
             .getCapability(/public/socialTokenReceiver)!
             .borrow<&{FungibleToken.Receiver}>()
             ?? panic("Unable to borrow receiver reference")
 
-            let mainFUSDVault = signer.borrow<&FungibleToken.Vault>(from: /storage/fusdVault)
+            let fusdVault = signer.borrow<&FungibleToken.Vault>(from: /storage/fusdVault)
                 ?? panic("cannot borrow FUSD vault from account storage")
             
-            self.paymentVault <- mainFUSDVault.withdraw(amount: amount)
+            self.paymentVault <- fusdVault.withdraw(amount: fusdPayment)
     }
 
     execute {
-        let mintedVault <- self.minterProxy.mintTokens(amount: amount, fusdPayment: <- self.paymentVault)
-
+        let mintedVault <- self.minterProxy.mintTokens(amount: socialTokenAmount, fusdPayment: <- self.paymentVault)
         self.tokenReceiver.deposit(from: <- mintedVault)
+
+        // @TODO handle if not enought FUSD
     }
 }
