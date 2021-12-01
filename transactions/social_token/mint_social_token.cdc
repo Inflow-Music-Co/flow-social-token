@@ -32,6 +32,6 @@ transaction(socialTokenAmount: UFix64, fusdPayment: UFix64) {
         let mintedVault <- self.minterProxy.mintTokens(amount: socialTokenAmount, fusdPayment: <- self.paymentVault)
         self.tokenReceiver.deposit(from: <- mintedVault)
 
-        // @TODO handle if not enought FUSD
+        // @TODO handle if not enough FUSD
     }
 }

@@ -3,8 +3,11 @@ import FUSD from 0xf8d6e0586b0a20c7
 
 pub contract SocialToken: FungibleToken {
 
-    /// Total supply of ExampleTokens in existence
+    /// Total supply of ExampleTokens in circulation
     pub var totalSupply: UFix64
+
+    /// Total amount of tokens allowed to be minted
+    pub var maximumSupply: UFix64
 
     /// Minimum required FUSD to mint new tokens
     pub var mintQuote: UFix64
@@ -59,14 +62,19 @@ pub contract SocialToken: FungibleToken {
         // This can be done efficiently in a script.
         pub let receiver: Capability<&{FungibleToken.Receiver}>
 
+        // The provider for the FUSD Collateral, this is used to deposit FUSD
+        // back to the signer's wallet after they burn
+        pub let provider: Capability<&{FungibleToken.Provider}>
+
         // The amount of the payment FungibleToken that will be paid to the receiver. use later 
         // for splits
         // pub let amount: UFix64
 
         // initializer
         //
-        init(receiver: Capability<&{FungibleToken.Receiver}>) {
+        init(receiver: Capability<&{FungibleToken.Receiver}>, provider: Capability<&{FungibleToken.Provider}>) {
             self.receiver = receiver
+            self.provider = provider
         }
     }
 
@@ -235,6 +243,10 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Burner {
 
+        pub fun calculateBurnQuote(amount: UFix64): UFix64 {
+            return amount * SocialToken.mintQuote
+        }
+
         /// burnTokens
         ///
         /// Function that destroys a Vault instance, effectively burning the tokens.
@@ -244,7 +256,10 @@ pub contract SocialToken: FungibleToken {
         ///
         pub fun burnTokens(from: @FungibleToken.Vault) {
             let vault <- from as! @SocialToken.Vault
+            
+            
             let amount = vault.balance
+            
             destroy vault
             emit TokensBurned(amount: amount)
         }
@@ -265,7 +280,7 @@ pub contract SocialToken: FungibleToken {
             self.burnerCapability = cap
         }
 
-        pub fun burnTokens(from: @FungibleToken.Vault) {
+        pub fun burnTokens(from: @FungibleToken.Vault){
             self.burnerCapability!.borrow()!.burnTokens(from: <- from)
         }
 
@@ -308,8 +323,8 @@ pub contract SocialToken: FungibleToken {
 
     init() {
         self.totalSupply = 1000.0
+        self.maximumSupply = 10000000.0
         self.mintQuote = 2.0
-
 
         self.AdminStoragePath = /storage/socialTokenAdmin
         self.MinterProxyPublicPath = /public/socialTokenMinterProxy
@@ -340,7 +355,8 @@ pub contract SocialToken: FungibleToken {
         )
 
         self.AdminPool = FUSDPool(
-            receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
+            receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
+            provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/public/fusdProvider)
             )
 
         let admin <- create Administrator()

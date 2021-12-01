@@ -22,7 +22,7 @@ func main() {
 	g.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
 
 	// First Account Mints and deposits in one transaction
-	g.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull();
+	g.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument(100.00).AccountArgument("first").RunPrintEventsFull();
 
 	//Log balance
 	fusdFirstAccountBalance := g.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
