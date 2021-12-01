@@ -20,12 +20,12 @@ transaction(socialTokenAmount: UFix64, fusdPayment: UFix64) {
         self.tokenReceiver = signer
             .getCapability(/public/socialTokenReceiver)!
             .borrow<&{FungibleToken.Receiver}>()
-            ?? panic("Unable to borrow receiver reference")
+            ?? panic("Unable to borrow Social Token receiver reference")
 
-            let fusdVault = signer.borrow<&FungibleToken.Vault>(from: /storage/fusdVault)
-                ?? panic("cannot borrow FUSD vault from account storage")
-            
-            self.paymentVault <- fusdVault.withdraw(amount: fusdPayment)
+        let fusdVault = signer.borrow<&FungibleToken.Vault>(from: /storage/fusdVault)
+            ?? panic("cannot borrow FUSD vault from account storage")
+        
+        self.paymentVault <- fusdVault.withdraw(amount: fusdPayment)
     }
 
     execute {

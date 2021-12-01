@@ -14,6 +14,15 @@ transaction {
 
         // It's OK if the account already has a Vault, but we don't want to replace it
         if(signer.borrow<&FUSD.Vault>(from: /storage/fusdVault) != nil) {
+
+            //@dev !!
+            // if Account does have a Vault, in this case it is the Admin account, and it 
+            // needs the receiver, so link it here. This must be cleaner, but for testing 
+            // purposes it is fine.
+            signer.link<&FUSD.Vault{FungibleToken.Receiver}>(
+                /public/fusdReceiver,
+                target: /storage/fusdVault
+            )
             return
         }
         

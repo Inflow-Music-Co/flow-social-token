@@ -20,5 +20,9 @@ mint-fusd:
 mint-with-collateral:
 	go run ./tasks/mint_with_collateral/main.go
 
+.PHONY: burn-with-collateral
+burn-with-collateral:
+	go run ./tasks/burn_with_collateral/main.go
+
 
 

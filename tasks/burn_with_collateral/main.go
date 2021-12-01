@@ -60,13 +60,14 @@ func main() {
 	//--------- SETUP AND BURN SOCIAL TOKEN -----------//
 	//-------------------------------------------------//
 
+	//First Account sets up Social Minter
 	flow.TransactionFromFile("social_token/setup_social_burner").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits burner into first account 
 	flow.TransactionFromFile("social_token/deposit_social_burner").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	//First Account Burns and deposits in one transaction
-	flow.TransactionFromFile(" ")
+	flow.TransactionFromFile("social_token/burn_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").RunPrintEventsFull()
 
 
 }

@@ -18,6 +18,8 @@ pub contract SocialToken: FungibleToken {
     /// The event that is emitted when a mintQuote is calculate
     pub event MintQuoteCalculated(quote: UFix64)
 
+    pub event BurnQuoteCalculated(quote: UFix64)
+
     /// The event that is emitted when tokens are withdrawn from a Vault
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
 
@@ -167,7 +169,9 @@ pub contract SocialToken: FungibleToken {
         access(self) let pool: FUSDPool
 
         pub fun calculateMintQuote(amount: UFix64): UFix64 {
-            return amount * SocialToken.mintQuote
+            let quote = amount * SocialToken.mintQuote
+            emit MintQuoteCalculated(quote: quote)
+            return quote
         }
 
         /// mintTokens
@@ -184,7 +188,6 @@ pub contract SocialToken: FungibleToken {
             SocialToken.totalSupply = SocialToken.totalSupply + amount
 
             SocialToken.mintQuote = self.calculateMintQuote(amount: amount)
-            emit MintQuoteCalculated(quote: SocialToken.mintQuote)
 
             //@TODO calculate creator splits and add to this code block
             if(fusdPayment.balance == SocialToken.mintQuote){
@@ -252,7 +255,9 @@ pub contract SocialToken: FungibleToken {
         access(self) let pool: FUSDPool
 
         pub fun calculateBurnQuote(amount: UFix64): UFix64 {
-            return amount * SocialToken.mintQuote
+            let quote = amount * SocialToken.mintQuote
+            emit BurnQuoteCalculated(quote: quote)
+            return quote
         }
 
         /// burnTokens
@@ -262,11 +267,14 @@ pub contract SocialToken: FungibleToken {
         /// Note: the burned tokens are automatically subtracted from the
         /// total supply in the Vault destructor.
         ///
-        pub fun burnTokens(from: @FungibleToken.Vault): @FungibleToken.Vault {
+        pub fun burnTokens(from: @FungibleToken.Vault): @FungibleToken.Vault {  
+            
             let vault <- from as! @SocialToken.Vault
             let provider = self.pool.provider.borrow()!
             let paymentAmount = self.calculateBurnQuote(amount: vault.balance)
             let payment <- provider!.withdraw(amount: paymentAmount)
+
+            SocialToken.totalSupply = SocialToken.totalSupply - vault.balance
             
             emit TokensBurned(amount: vault.balance)
             destroy vault
@@ -337,7 +345,7 @@ pub contract SocialToken: FungibleToken {
     }
 
     init() {
-        self.totalSupply = 1000.0
+        self.totalSupply = 0.0
         self.maximumSupply = 10000000.0
         self.mintQuote = 2.0
 
@@ -368,6 +376,13 @@ pub contract SocialToken: FungibleToken {
             /public/socialTokenBalance,
             target: /storage/socialTokenVault
         )
+
+        //Create the Empty FUSD Vault here not in a setup tx so that FUSDPOOl can get access to VaultRef for withdrawal on burn
+        self.account.save(<- FUSD.createEmptyVault(), to: /storage/fusdVault)
+
+        // As we have created the FUSD Vault we can borrow a ref to the vault now and pass it to the FUSD Pool Constructor
+        let fusdVaultRef = self.account.borrow<&FUSD.Vault>(from: /storage/fusdVault)
+            ?? panic("Could not borrow a reference to the Admin's FUSD Vault.")
 
         self.AdminPool = FUSDPool(
             receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),

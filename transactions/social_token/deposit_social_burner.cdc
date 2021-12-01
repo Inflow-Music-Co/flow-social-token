@@ -30,7 +30,7 @@ transaction(burnerAddress: Address) {
             ?? panic("Could not borrow a reference to the admin resource")
 
         // Create a new burner resource and a private link to a capability for it in the admin's storage.
-        let burner <- tokenAdmin.createNewBurner()
+        let burner <- tokenAdmin.createNewBurner(pool: SocialToken.AdminPool)
         
         adminAccount.save(<- burner, to: self.resourceStoragePath)
         
