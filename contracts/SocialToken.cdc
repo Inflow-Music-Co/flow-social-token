@@ -66,13 +66,18 @@ pub contract SocialToken: FungibleToken {
         // back to the signer's wallet after they burn
         pub let provider: Capability<&{FungibleToken.Provider}>
 
+      
+
         // The amount of the payment FungibleToken that will be paid to the receiver. use later 
         // for splits
         // pub let amount: UFix64
 
         // initializer
         //
-        init(receiver: Capability<&{FungibleToken.Receiver}>, provider: Capability<&{FungibleToken.Provider}>) {
+        init(
+            receiver: Capability<&{FungibleToken.Receiver}>, 
+            provider: Capability<&{FungibleToken.Provider}>
+            ) {
             self.receiver = receiver
             self.provider = provider
         }
@@ -181,6 +186,7 @@ pub contract SocialToken: FungibleToken {
             SocialToken.mintQuote = self.calculateMintQuote(amount: amount)
             emit MintQuoteCalculated(quote: SocialToken.mintQuote)
 
+            //@TODO calculate creator splits and add to this code block
             if(fusdPayment.balance == SocialToken.mintQuote){
                 let receiver = self.pool.receiver.borrow()!
                 let payment <- fusdPayment.withdraw(amount: fusdPayment.balance)
@@ -243,6 +249,8 @@ pub contract SocialToken: FungibleToken {
     ///
     pub resource Burner {
 
+        access(self) let pool: FUSDPool
+
         pub fun calculateBurnQuote(amount: UFix64): UFix64 {
             return amount * SocialToken.mintQuote
         }
@@ -254,14 +262,19 @@ pub contract SocialToken: FungibleToken {
         /// Note: the burned tokens are automatically subtracted from the
         /// total supply in the Vault destructor.
         ///
-        pub fun burnTokens(from: @FungibleToken.Vault) {
+        pub fun burnTokens(from: @FungibleToken.Vault): @FungibleToken.Vault {
             let vault <- from as! @SocialToken.Vault
+            let provider = self.pool.provider.borrow()!
+            let paymentAmount = self.calculateBurnQuote(amount: vault.balance)
+            let payment <- provider!.withdraw(amount: paymentAmount)
             
-            
-            let amount = vault.balance
-            
+            emit TokensBurned(amount: vault.balance)
             destroy vault
-            emit TokensBurned(amount: amount)
+            return <- payment
+        }
+
+        init(pool: FUSDPool) {
+            self.pool = pool
         }
     }
 
@@ -280,8 +293,10 @@ pub contract SocialToken: FungibleToken {
             self.burnerCapability = cap
         }
 
-        pub fun burnTokens(from: @FungibleToken.Vault){
-            self.burnerCapability!.borrow()!.burnTokens(from: <- from)
+        pub fun burnTokens(from: @FungibleToken.Vault): @FungibleToken.Vault {
+            return <- self.burnerCapability!
+                .borrow()!
+                .burnTokens(from: <- from)
         }
 
         init() {
@@ -315,9 +330,9 @@ pub contract SocialToken: FungibleToken {
         ///
         /// Function that creates and returns a new burner resource
         ///
-        pub fun createNewBurner(): @Burner {
+        pub fun createNewBurner(pool: SocialToken.FUSDPool): @Burner {
             emit BurnerCreated()
-            return <-create Burner()
+            return <-create Burner(pool: pool)
         }
     }
 

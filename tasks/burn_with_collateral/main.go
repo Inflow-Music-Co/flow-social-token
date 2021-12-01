@@ -53,8 +53,20 @@ func main() {
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()
 	log.Printf(" ------ MINT QUOTE ----- %s", mintQuote)
 
+	//First Account Mints and deposits in one transaction
 	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()	
 
+	//-------------------------------------------------//
+	//--------- SETUP AND BURN SOCIAL TOKEN -----------//
+	//-------------------------------------------------//
+
+	flow.TransactionFromFile("social_token/setup_social_burner").SignProposeAndPayAs("first").RunPrintEventsFull()
+
+	//Admin Account deposits burner into first account 
+	flow.TransactionFromFile("social_token/deposit_social_burner").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
+
+	//First Account Burns and deposits in one transaction
+	flow.TransactionFromFile(" ")
 
 
 }
