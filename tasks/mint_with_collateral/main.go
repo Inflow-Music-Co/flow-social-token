@@ -55,6 +55,4 @@ func main() {
 
 	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()	
 
-
-
 }

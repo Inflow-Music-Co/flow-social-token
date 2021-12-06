@@ -68,6 +68,4 @@ func main() {
 
 	//First Account Burns and deposits in one transaction
 	flow.TransactionFromFile("social_token/burn_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").RunPrintEventsFull()
-
-
 }

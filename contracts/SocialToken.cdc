@@ -18,6 +18,7 @@ pub contract SocialToken: FungibleToken {
     /// The event that is emitted when a mintQuote is calculate
     pub event MintQuoteCalculated(quote: UFix64)
 
+
     pub event BurnQuoteCalculated(quote: UFix64)
 
     /// The event that is emitted when tokens are withdrawn from a Vault
@@ -55,7 +56,7 @@ pub contract SocialToken: FungibleToken {
 
     pub var AdminPool: FUSDPool
 
-   pub struct FUSDPool {
+    pub struct FUSDPool {
         // The receiver for the FUSD Collateral.
         // Note that we do not store an address to find the Vault that this represents,
         // as the link or resource that we fetch in this way may be manipulated,
@@ -377,6 +378,12 @@ pub contract SocialToken: FungibleToken {
             target: /storage/socialTokenVault
         )
 
+        //create private capability to the fusd provider
+        self.account.link<&FUSD.Vault{FungibleToken.Provider}>(
+            /private/fusdProvider,
+            target: /storage/fusdVault
+        )
+
         //Create the Empty FUSD Vault here not in a setup tx so that FUSDPOOl can get access to VaultRef for withdrawal on burn
         self.account.save(<- FUSD.createEmptyVault(), to: /storage/fusdVault)
 
@@ -386,7 +393,7 @@ pub contract SocialToken: FungibleToken {
 
         self.AdminPool = FUSDPool(
             receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
-            provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/public/fusdProvider)
+            provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider)
             )
 
         let admin <- create Administrator()
@@ -397,3 +404,4 @@ pub contract SocialToken: FungibleToken {
         emit TokensInitialized(initialSupply: self.totalSupply)
     }
 }
+
