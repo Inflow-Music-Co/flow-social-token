@@ -46,7 +46,7 @@ make <taskName>
 
 ## Gotchas
  - When specifying extra accounts that are created on emulator they are created in alphabetical order, the addresses the emulator assign is always fixed. 
- - tldr; Name your stakeholder acounts in alphabetical order.
+ - tldr; Name your stakeholder acounts in alphabetical order
 
 ## Examples
 
