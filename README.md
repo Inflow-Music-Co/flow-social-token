@@ -50,7 +50,7 @@ make <taskName>
 
 ## Examples
 
-In order to run the demo example you only have to run `make` in the example folder of this project. 
+In order to run the demo example you only have to run `make` in the example folder of this project
 The emulator will be run in memory. 
 
 ## Credits
