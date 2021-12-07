@@ -24,5 +24,8 @@ mint-with-collateral:
 burn-with-collateral:
 	go run ./tasks/burn_with_collateral/main.go
 
+.PHONY: get-social-details
+get-social-details:
+	go run ./tasks/get_social_details/main.go
 
 
