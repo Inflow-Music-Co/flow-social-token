@@ -54,7 +54,11 @@ pub contract SocialToken: FungibleToken {
     // The public path for minters' MinterProxy capability
     pub let BurnerProxyPublicPath: PublicPath
 
+    // The namespace to assign and initialise the FUSDConstructor Values
     pub var AdminPool: FUSDPool
+
+    // the namespace to assign and initialise the NameConstructor Values
+    pub var SocialTokenDetails: Details
 
     pub struct FUSDPool {
         // The receiver for the FUSD Collateral.
@@ -86,7 +90,7 @@ pub contract SocialToken: FungibleToken {
         }
     }
 
-    pub struct Name {
+    pub struct Details {
         
         pub let tokenName: String
 
@@ -96,6 +100,39 @@ pub contract SocialToken: FungibleToken {
             self.tokenName = tokenName
             self.symbol = symbol
         }
+    }
+
+    pub resource Artist {
+        access(self) let details: Details
+
+        init(details: Details) {
+            self.details = details
+        }
+    }
+
+    pub resource interface ArtistProxyPublic {
+        pub fun setArtistCapability(cap: Capability<&Artist>)
+    }
+
+    pub resource ArtistProxy: ArtistProxyPublic {
+
+        access(self) var artistCapability: Capability<&Artist>?
+
+        pub fun setArtistCapability(cap: Capability<&Artist>) {
+            self.artistCapability = cap
+        }
+
+        pub fun setTokenName(){
+
+        }
+
+        init() {
+            self.artistCapability = nil
+        }
+    }
+
+    pub fun getTokenDetails(): Details {
+        return self.SocialTokenDetails
     }
 
     /// Vault
@@ -405,10 +442,17 @@ pub contract SocialToken: FungibleToken {
         let fusdVaultRef = self.account.borrow<&FUSD.Vault>(from: /storage/fusdVault)
             ?? panic("Could not borrow a reference to the Admin's FUSD Vault.")
 
+        // Initialize AdminPool with the FUSD Constructor
         self.AdminPool = FUSDPool(
             receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
             provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider)
             )
+        
+        //Initialise SocialTokenDetails with the Details Constructor
+        self.SocialTokenDetails = Details(
+            tokenName: "",
+            symbol: ""
+        )
 
         let admin <- create Administrator()
         self.account.save(<-admin, to: /storage/socialTokenAdmin)
