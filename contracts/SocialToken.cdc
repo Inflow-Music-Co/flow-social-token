@@ -86,6 +86,18 @@ pub contract SocialToken: FungibleToken {
         }
     }
 
+    pub struct Name {
+        
+        pub let tokenName: String
+
+        pub let symbol: String
+
+        init(tokenName: String, symbol: String) {
+            self.tokenName = tokenName
+            self.symbol = symbol
+        }
+    }
+
     /// Vault
     ///
     /// Each user stores an instance of only the Vault in their storage
@@ -202,7 +214,6 @@ pub contract SocialToken: FungibleToken {
             
             log("could not mint tokens, fusd not equal to mint quote") 
             return <- fusdPayment
-            
         }
 
         init(pool: FUSDPool) {
@@ -378,7 +389,10 @@ pub contract SocialToken: FungibleToken {
             target: /storage/socialTokenVault
         )
 
-        //create private capability to the fusd provider
+        // Create private capability to the fusd provider this allows us get the capability in the FUSD constructor below
+        // We do this so that the contract can withdraw FUSD vault amount when it needs to pay back FUSD after a successful burn 
+        // This provider is private and comes from the deployer account, no one else can get access to this capabiity
+        //
         self.account.link<&FUSD.Vault{FungibleToken.Provider}>(
             /private/fusdProvider,
             target: /storage/fusdVault
