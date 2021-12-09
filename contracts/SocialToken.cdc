@@ -82,11 +82,11 @@ pub contract SocialToken: FungibleToken {
         // initializer
         //
         init(
-            receiver: Capability<&{FungibleToken.Receiver}>, 
-            provider: Capability<&{FungibleToken.Provider}>
+            _receiver: Capability<&{FungibleToken.Receiver}>, 
+            _provider: Capability<&{FungibleToken.Provider}>
             ) {
-            self.receiver = receiver
-            self.provider = provider
+            self.receiver = _receiver
+            self.provider = _provider
         }
     }
 
@@ -96,14 +96,18 @@ pub contract SocialToken: FungibleToken {
 
         pub let symbol: String
 
-        init(tokenName: String, symbol: String) {
-            self.tokenName = tokenName
-            self.symbol = symbol
+        init(_tokenName: String, _symbol: String) {
+            self.tokenName = _tokenName
+            self.symbol = _symbol
         }
     }
 
     pub resource Artist {
         access(self) let details: Details
+
+        pub fun setDetails(tokenName: String, symbol: String) {
+            self.SocialTokenDetails = Details(_tokenName: tokenName, _symbol: symbol)
+        }
 
         init(details: Details) {
             self.details = details
