@@ -103,10 +103,10 @@ pub contract SocialToken: FungibleToken {
     }
 
     pub resource Artist {
-        access(self) let details: Details
+        access(self) var details: Details
 
         pub fun setDetails(tokenName: String, symbol: String) {
-            self.SocialTokenDetails = Details(_tokenName: tokenName, _symbol: symbol)
+            self.details = Details(_tokenName: tokenName, _symbol: symbol)
         }
 
         init(details: Details) {
@@ -448,14 +448,14 @@ pub contract SocialToken: FungibleToken {
 
         // Initialize AdminPool with the FUSD Constructor
         self.AdminPool = FUSDPool(
-            receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
-            provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider)
+            _receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
+            _provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider)
             )
         
         //Initialise SocialTokenDetails with the Details Constructor
         self.SocialTokenDetails = Details(
-            tokenName: "",
-            symbol: ""
+            _tokenName: "",
+            _symbol: ""
         )
 
         let admin <- create Administrator()
