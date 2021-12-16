@@ -39,6 +39,10 @@ pub contract SocialToken: FungibleToken {
     /// The event that is emitted when a new burner resource is created
     pub event BurnerCreated()
 
+    // The event that is emitted when a fee is distribute
+    pub event FeeDistribute(fee: UFix64, Address: Address)
+
+
     // The storage path for the admin resource
     pub let AdminStoragePath: StoragePath
 
@@ -59,6 +63,29 @@ pub contract SocialToken: FungibleToken {
 
     // the namespace to assign and initialise the NameConstructor Values
     pub var SocialTokenDetails: Details
+       
+    // The Structure to store fee Splitter Values
+    access(self) var feeSplitterDetail :{Address:{String:AnyStruct}}
+   
+    // Vaults of capabilities to receive FUSD
+    access(self) let walletVaults:{Address:Capability<&AnyResource{FungibleToken.Receiver}>}
+
+    // Private Function that will trigger whenever any mint or burn method is called
+    // this will distribute amount to respective address according to feeDetails
+    access(self) fun distributeFee(fusdPayment:@FungibleToken.Vault,amount: UFix64) :@FungibleToken.Vault{
+            for walletAddress in SocialToken.feeSplitterDetail.keys 
+            {
+                let feeDetail = SocialToken.feeSplitterDetail[walletAddress]!
+                let percentage:UFix64 = UFix64(feeDetail["percentage"]! as! UFix64)
+                let fee = amount*percentage
+                var payment <- fusdPayment.withdraw(amount: fee)
+                let vaultRef = SocialToken.walletVaults[walletAddress]!.borrow()
+                emit FeeDistribute(fee:fee,Address:walletAddress)
+                vaultRef!.deposit(from: <- payment)
+            }
+
+            return <-fusdPayment
+    }
 
     pub struct FUSDPool {
         // The receiver for the FUSD Collateral.
@@ -245,10 +272,20 @@ pub contract SocialToken: FungibleToken {
 
             //@TODO calculate creator splits and add to this code block
             if(fusdPayment.balance == SocialToken.mintQuote){
-                let receiver = self.pool.receiver.borrow()!
-                let payment <- fusdPayment.withdraw(amount: fusdPayment.balance)
-                receiver!.deposit(from: <- payment)
-                destroy fusdPayment
+                if SocialToken.feeSplitterDetail.keys.length > 0 {
+                    let totalPayment = fusdPayment.balance
+                    let fusdPaymentRemaining <-! SocialToken.distributeFee(fusdPayment:<-fusdPayment,amount:totalPayment)  
+
+                    let receiver = self.pool.receiver.borrow()! 
+                    let payment <- fusdPaymentRemaining.withdraw(amount: fusdPaymentRemaining.balance)
+                    receiver!.deposit(from: <- payment)
+                    destroy fusdPaymentRemaining
+                } else {
+                    let receiver = self.pool.receiver.borrow()!
+                    let payment <- fusdPayment.withdraw(amount: fusdPayment.balance)
+                    receiver!.deposit(from: <- payment)
+                    destroy fusdPayment
+                }
                 emit TokensMinted(amount: amount)
                 return <-create Vault(balance: amount)
             }
@@ -395,12 +432,28 @@ pub contract SocialToken: FungibleToken {
             emit BurnerCreated()
             return <-create Burner(pool: pool)
         }
+
+        /// setFeeStructure
+        ///
+        /// Function that sets a fee variable
+        ///
+        pub fun setFeeStructure(address: Address, value:{String:AnyStruct}, ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>){
+            pre {
+                address != nil : "Address must not be nil"
+                value != nil :"Fee Detail must not be nil"            
+            }
+            // Initialize Social Token Fee Structure
+            SocialToken.feeSplitterDetail[address] = value  
+            SocialToken.walletVaults[address] = ownerVault
+        }    
     }
 
     init() {
         self.totalSupply = 0.0
         self.maximumSupply = 10000000.0
         self.mintQuote = 2.0
+        self.feeSplitterDetail = {}
+        self.walletVaults = {}
 
         self.AdminStoragePath = /storage/socialTokenAdmin
         self.MinterProxyPublicPath = /public/socialTokenMinterProxy
