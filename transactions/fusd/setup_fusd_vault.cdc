@@ -23,6 +23,14 @@ transaction {
                 /public/fusdReceiver,
                 target: /storage/fusdVault
             )
+
+            // Create a public capability to the Vault that only exposes
+            // the balance field through the Balance interface
+            signer.link<&FUSD.Vault{FungibleToken.Balance}>(
+                /public/fusdBalance,
+                target: /storage/fusdVault
+            )
+            
             return
         }
         
