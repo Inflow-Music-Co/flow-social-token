@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/bjartek/go-with-the-flow/v2/gwtf"
-	
 )
 
 func main() {
@@ -16,20 +15,21 @@ func main() {
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	//FUSD// 
+	//FUSD//
 
 	//Setup FUSD Vaults for both accounts
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull();
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull();
+	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
+	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("second").RunPrintEventsFull()
 
 	//First Account sets up FUSD Minter
-	flow.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull();
+	flow.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits minter into first account
-	flow.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
+	flow.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	// First Account Mints and deposits in one transaction
-	flow.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull();
+	flow.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull()
 
 	//Log balance
 	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
@@ -47,12 +47,15 @@ func main() {
 	flow.TransactionFromFile("social_token/setup_social_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits minter into first account
-	flow.TransactionFromFile("social_token/deposit_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
+	flow.TransactionFromFile("social_token/deposit_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	//Get the mintQoute for the specificed amount of socialTokens
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()
 	log.Printf(" ------ MINT QUOTE ----- %s", mintQuote)
 
-	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()	
+	// set accounts and percentage they get while minting
+	flow.TransactionFromFile("social_token/set_fee_splitter").SignProposeAndPayAs("account").AccountArgument("second").UFix64Argument("0.12").RunPrintEventsFull()
+
+	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()
 
 }

@@ -8,7 +8,7 @@ transaction(socialTokenAmount: UFix64, fusdPayment: UFix64) {
     let paymentVault: @FungibleToken.Vault
     let tokenReceiver: &{FungibleToken.Receiver}
     let minterProxy: &SocialToken.MinterProxy
-    
+    let fusdReceiver: Capability<&AnyResource{FungibleToken.Receiver}>
 
     prepare(signer: AuthAccount) {
 
@@ -26,10 +26,13 @@ transaction(socialTokenAmount: UFix64, fusdPayment: UFix64) {
             ?? panic("cannot borrow FUSD vault from account storage")
         
         self.paymentVault <- fusdVault.withdraw(amount: fusdPayment)
+
+        self.fusdReceiver = getAccount(signer.address)
+            .getCapability<&{FungibleToken.Receiver}>(/public/fusdReceiver)!
     }
 
     execute {
-        let mintedVault <- self.minterProxy.mintTokens(amount: socialTokenAmount, fusdPayment: <- self.paymentVault)
+        let mintedVault <- self.minterProxy.mintTokens(amount: socialTokenAmount, fusdPayment: <- self.paymentVault, receiverVault: self.fusdReceiver)
         self.tokenReceiver.deposit(from: <- mintedVault)
 
         // @TODO handle if not enough FUSD
