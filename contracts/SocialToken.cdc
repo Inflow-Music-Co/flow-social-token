@@ -12,6 +12,12 @@ pub contract SocialToken: FungibleToken {
     /// Minimum required FUSD to mint new tokens
     pub var mintQuote: UFix64
 
+    // slope to apply to bonding curve calculations
+    access(self) var slope: UFix64
+
+    // Funds reserved for burns
+    access(self) var reserve: UFix64
+
     /// The event that is emitted when the contract is created
     pub event TokensInitialized(initialSupply: UFix64)
 
@@ -42,7 +48,6 @@ pub contract SocialToken: FungibleToken {
     // The event that is emitted when a fee is distribute
     pub event FeeDistribute(fee: UFix64, Address: Address)
 
-
     // The storage path for the admin resource
     pub let AdminStoragePath: StoragePath
 
@@ -63,8 +68,8 @@ pub contract SocialToken: FungibleToken {
 
     // the namespace to assign and initialise the NameConstructor Values
     pub var SocialTokenDetails: Details
-       
-    // The Structure to store fee Splitter Values
+
+    // The Structure to store fee distribution
     access(self) var feeSplitterDetail :{Address:{String:AnyStruct}}
    
     // Vaults of capabilities to receive FUSD
@@ -73,6 +78,7 @@ pub contract SocialToken: FungibleToken {
     // Private Function that will trigger whenever any mint or burn method is called
     // this will distribute amount to respective address according to feeDetails
     access(self) fun distributeFee(fusdPayment:@FungibleToken.Vault,amount: UFix64) :@FungibleToken.Vault{
+            
             for walletAddress in SocialToken.feeSplitterDetail.keys 
             {
                 let feeDetail = SocialToken.feeSplitterDetail[walletAddress]!
@@ -128,6 +134,7 @@ pub contract SocialToken: FungibleToken {
             self.symbol = _symbol
         }
     }
+
 
     pub resource Artist {
         access(self) var details: Details
@@ -237,9 +244,46 @@ pub contract SocialToken: FungibleToken {
         return <-create Vault(balance: 0.0)
     }
 
-    pub fun getMintQuote(amount: UFix64): UFix64 {
-        return amount * SocialToken.mintQuote
+
+    //////////////////////////////
+    /// PUBLIC PRICE FUNCTIONS ///
+    //////////////////////////////
+
+    /// @dev Calculate collateral price to mint
+    /// @param amount (UFix64): Amount of social tokens to mint
+    /// @return (uint256): Collateral required to mint social token amount
+    pub fun getMintPrice(amount: UFix64): UFix64{
+        pre {
+            amount > 0.0: "Amount must be greator than zero"
+        }
+
+        let supply = SocialToken.totalSupply
+        if supply == 0.0 {
+            return (SocialToken.slope * amount)
+        } else {
+        // new supply value after adding amount
+            let newSupply = supply + amount
+            var _reserve = SocialToken.reserve;
+            return (((_reserve * newSupply * newSupply) / (supply * supply)) - _reserve)
+        }
     }
+
+    /// @dev Calculate collateral received on burn
+    /// @param amount (UFix64): Amount of social tokens to burn
+    /// @return (UFix64): Collateral received if input social token amount is burned
+    pub fun getBurnPrice(amount: UFix64): UFix64{
+        pre {
+            amount > 0.0: "Amount must be greator than zero"
+        }
+
+        let supply = SocialToken.totalSupply
+        assert((supply > 0.0), message: "SocialToken: supply is zero")
+        assert((supply>=amount), message: "SocialToken: amount greater than supply")
+        let newSupply = supply - amount
+        var _reserve = SocialToken.reserve;
+        return (_reserve - ((_reserve * newSupply * newSupply) / (supply * supply)))
+        // _reserve - ((_reserve * newSupply * newSupply) / (supply * supply));
+        }
 
     /// Minter
     ///
@@ -261,36 +305,41 @@ pub contract SocialToken: FungibleToken {
         /// FUSD Vault gets sent to administrator account 
         /// and returns the minted SocialTokens to the calling context.
         ///
-        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
+        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @FungibleToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
+                SocialToken.feeSplitterDetail.keys.length > 0: "Fee Splitter not set"
+                (amount + SocialToken.totalSupply) < SocialToken.maximumSupply: "You have reached the maximum Supply"
             }
-            
-            SocialToken.totalSupply = SocialToken.totalSupply + amount
 
-            SocialToken.mintQuote = self.calculateMintQuote(amount: amount)
+            var remainingFUSD = 0.0
+            var remainingSocialToken = 0.0
+            // collateral required to mint social tokens amount
+            var mintPrice:UFix64 = SocialToken.getMintPrice(amount: amount)
 
-            //@TODO calculate creator splits and add to this code block
-            if(fusdPayment.balance == SocialToken.mintQuote){
-                if SocialToken.feeSplitterDetail.keys.length > 0 {
-                    let totalPayment = fusdPayment.balance
-                    let fusdPaymentRemaining <-! SocialToken.distributeFee(fusdPayment:<-fusdPayment,amount:totalPayment)  
-
-                    let receiver = self.pool.receiver.borrow()! 
-                    let payment <- fusdPaymentRemaining.withdraw(amount: fusdPaymentRemaining.balance)
-                    receiver!.deposit(from: <- payment)
-                    destroy fusdPaymentRemaining
-                } else {
-                    let receiver = self.pool.receiver.borrow()!
-                    let payment <- fusdPayment.withdraw(amount: fusdPayment.balance)
-                    receiver!.deposit(from: <- payment)
-                    destroy fusdPayment
+            if (fusdPayment.balance >= mintPrice) {
+                var totalPayment = fusdPayment.balance
+                assert(totalPayment>=mintPrice, message: "No payment yet")
+                let extraAmount = totalPayment-mintPrice
+                if(extraAmount > 0.0){
+                    //Create Vault of extra amount and deposit back to user
+                    totalPayment=totalPayment-extraAmount
+                    let remainingAmountVault <- fusdPayment.withdraw(amount: extraAmount)
+                    let remainingVault = receiverVault.borrow()!
+                    remainingVault!.deposit(from: <- remainingAmountVault)
                 }
+                SocialToken.totalSupply = SocialToken.totalSupply + amount
+                let fusdPaymentRemaining <-! SocialToken.distributeFee(fusdPayment:<-fusdPayment,amount:totalPayment)  
+                let receiver = self.pool.receiver.borrow()! 
+                SocialToken.reserve = SocialToken.reserve + totalPayment -(mintPrice-fusdPaymentRemaining.balance)
+                // add remaining payment to pool
+                let payment <- fusdPaymentRemaining.withdraw(amount: fusdPaymentRemaining.balance)
+                receiver!.deposit(from: <- payment)
+                destroy fusdPaymentRemaining
+                // event emit having social token amount
                 emit TokensMinted(amount: amount)
                 return <-create Vault(balance: amount)
             }
-            
-            log("could not mint tokens, fusd not equal to mint quote") 
             return <- fusdPayment
         }
 
@@ -314,10 +363,10 @@ pub contract SocialToken: FungibleToken {
             self.minterCapability = cap
         }
 
-        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
+        pub fun mintTokens(amount: UFix64, fusdPayment: @FungibleToken.Vault,receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @FungibleToken.Vault {
             return <- self.minterCapability!
                 .borrow()!
-                .mintTokens(amount: amount, fusdPayment: <- fusdPayment)
+                .mintTokens(amount: amount, fusdPayment: <- fusdPayment,receiverVault:receiverVault)
         }
 
         init() {
@@ -361,10 +410,11 @@ pub contract SocialToken: FungibleToken {
             
             let vault <- from as! @SocialToken.Vault
             let provider = self.pool.provider.borrow()!
-            let paymentAmount = self.calculateBurnQuote(amount: vault.balance)
+            // change function and use getburn
+            let paymentAmount = SocialToken.getBurnPrice(amount: vault.balance)
+            SocialToken.reserve = SocialToken.reserve - paymentAmount
             let payment <- provider!.withdraw(amount: paymentAmount)
-
-            SocialToken.totalSupply = SocialToken.totalSupply - vault.balance
+           //SocialToken.totalSupply = SocialToken.totalSupply - vault.balance
             
             emit TokensBurned(amount: vault.balance)
             destroy vault
@@ -413,6 +463,17 @@ pub contract SocialToken: FungibleToken {
         return <- create BurnerProxy()
     }
 
+    // getFeeStructure
+    //
+    // Function that creates a Fee Structure.
+    // Anyone can call this function to see fee structure but
+    // only the admin can create or update that structure
+    //
+    pub fun getFeeStructure(): {Address: AnyStruct} {
+        return SocialToken.feeSplitterDetail
+    }
+
+
     pub resource Administrator {
 
         /// createNewMinter
@@ -433,9 +494,9 @@ pub contract SocialToken: FungibleToken {
             return <-create Burner(pool: pool)
         }
 
-        /// setFeeStructure
+        /// createFeeStructure
         ///
-        /// Function that sets a fee variable
+        /// Function that creates a fee variable
         ///
         pub fun setFeeStructure(address: Address, value:{String:AnyStruct}, ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>){
             pre {
@@ -445,16 +506,26 @@ pub contract SocialToken: FungibleToken {
             // Initialize Social Token Fee Structure
             SocialToken.feeSplitterDetail[address] = value  
             SocialToken.walletVaults[address] = ownerVault
-        }    
+        }     
+
+        pub fun changeSlope(slope:UFix64){
+            pre{
+                slope > 0.0
+            }
+            SocialToken.slope = slope
+        }
+
     }
 
     init() {
         self.totalSupply = 0.0
         self.maximumSupply = 10000000.0
         self.mintQuote = 2.0
+        self.reserve = 0.0
+        self.slope = 0.00005
         self.feeSplitterDetail = {}
         self.walletVaults = {}
-
+                                                                
         self.AdminStoragePath = /storage/socialTokenAdmin
         self.MinterProxyPublicPath = /public/socialTokenMinterProxy
         self.MinterProxyStoragePath = /storage/socialTokenMinterProxy
@@ -519,4 +590,3 @@ pub contract SocialToken: FungibleToken {
         emit TokensInitialized(initialSupply: self.totalSupply)
     }
 }
-

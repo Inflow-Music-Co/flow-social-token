@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/bjartek/go-with-the-flow/v2/gwtf"
-	
 )
 
 func main() {
@@ -16,11 +15,12 @@ func main() {
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	//FUSD// 
+	//FUSD//
 
 	//Setup FUSD Vaults for both accounts
 	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
 	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
+	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("second").RunPrintEventsFull()
 
 	//First Account sets up FUSD Minter
 	flow.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
@@ -53,8 +53,13 @@ func main() {
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("3.3333").RunFailOnError()
 	log.Printf(" ------ MINT QUOTE ----- %s", mintQuote)
 
+	// set accounts and percentage they get while minting
+	flow.TransactionFromFile("social_token/set_fee_splitter").SignProposeAndPayAs("account").AccountArgument("second").UFix64Argument("0.12").RunPrintEventsFull()
+
+	tokenSupply := flow.ScriptFromFile("get_supply").RunFailOnError()
+	log.Printf(" ------ Supply of Social Token ----- %s", tokenSupply)
 	//First Account Mints and deposits in one transaction
-	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()	
+	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("3.3333").UFix64Argument("6.6666").RunPrintEventsFull()
 
 	//-------------------------------------------------//
 	//--------- SETUP AND BURN SOCIAL TOKEN -----------//
@@ -63,9 +68,14 @@ func main() {
 	//First Account sets up Social Minter
 	flow.TransactionFromFile("social_token/setup_social_burner").SignProposeAndPayAs("first").RunPrintEventsFull()
 
-	//Admin Account deposits burner into first account 
+	//Admin Account deposits burner into first account
 	flow.TransactionFromFile("social_token/deposit_social_burner").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
+	tokenSupply = flow.ScriptFromFile("get_supply").RunFailOnError()
+	log.Printf(" ------ Supply of Social Token ----- %s", tokenSupply)
 	//First Account Burns and deposits in one transaction
 	flow.TransactionFromFile("social_token/burn_social_token").SignProposeAndPayAs("first").UFix64Argument("0.3").RunPrintEventsFull()
+
+	tokenSupply = flow.ScriptFromFile("get_supply").RunFailOnError()
+	log.Printf(" ------ Supply of Social Token ----- %s", tokenSupply)
 }
