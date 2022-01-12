@@ -24,6 +24,10 @@ mint-with-collateral:
 mint-with-fee-distribution:
 	go run ./tasks/mint_with_fee_distribution/main.go
 	
+.PHONY: mint-with-special_preAllocation
+mint-with-special-preAllocation:
+	go run ./tasks/mint_with_special_preAllocation/main.go
+
 .PHONY: burn-with-collateral
 burn-with-collateral:
 	go run ./tasks/burn_with_collateral/main.go

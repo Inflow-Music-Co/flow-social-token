@@ -67,12 +67,15 @@ pub contract SocialToken: FungibleToken {
     pub var AdminPool: FUSDPool
 
     // the namespace to assign and initialise the NameConstructor Values
-    pub var SocialTokenDetails: Details
+    access(self) var SocialTokenDetails: Details
+
+    // the namespace to assign and initialise the NameConstructor Values
+    access(contract) var  SocialTokenPreAllocation: PreAllocation
 
     // The Structure to store fee distribution
     access(self) var feeSplitterDetail :{Address:{String:AnyStruct}}
    
-    // Vaults of capabilities to receive FUSD
+    // Vaults to receive FUSD
     access(self) let walletVaults:{Address:Capability<&AnyResource{FungibleToken.Receiver}>}
 
     // Private Function that will trigger whenever any mint or burn method is called
@@ -129,18 +132,56 @@ pub contract SocialToken: FungibleToken {
 
         pub let symbol: String
 
-        init(_tokenName: String, _symbol: String) {
+        pub let owner: Address
+        
+        init(_tokenName: String, _symbol: String, _owner: Address) {
             self.tokenName = _tokenName
             self.symbol = _symbol
+            self.owner = _owner
         }
+    }
+
+    // PreAllocation Structure of distribution of rewards
+    pub struct PreAllocation {
+
+        pub let address: Address
+        // Inital Supply 10,000
+        pub let initialRewardLimit: UFix64
+        // Total Milestone 
+        pub var totalMilestones: UInt
+        // Milestones Completed
+        pub(set) var completedMilestones: UInt
+        // Rewards will be distr
+        pub(set) var rewardedTokens: UFix64
+       // Artist address wallet
+        pub let receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>
+
+        init(_address: Address, _initialRewardLimit: UFix64, _rewardedTokens: UFix64 ,_milestone: UInt,_receiverVault:Capability<&AnyResource{FungibleToken.Receiver}>) {
+            
+            pre {
+                _initialRewardLimit > 0.0: "Rewards should be greater than zero"
+                _rewardedTokens > 0.0: "Rewards should be greater than zero"
+                _milestone > 0: "Milestones should be greater than zero"
+                _initialRewardLimit * UFix64(_milestone) < SocialToken.maximumSupply : "Total Value Should be less than Total supply"
+                SocialToken.power(power: ((_milestone -_milestone)) , value: UInt(_initialRewardLimit)) < UInt(SocialToken.maximumSupply): "Limit exceed"
+            }
+
+            self.address = _address
+            self.initialRewardLimit = _initialRewardLimit
+            self.totalMilestones = _milestone
+            self.completedMilestones = 0
+            self.rewardedTokens = _rewardedTokens
+            self.receiverVault = _receiverVault
+        }
+
     }
 
 
     pub resource Artist {
         access(self) var details: Details
 
-        pub fun setDetails(tokenName: String, symbol: String) {
-            self.details = Details(_tokenName: tokenName, _symbol: symbol)
+        pub fun setDetails(tokenName: String, symbol: String, owner: Address) {
+            self.details = Details(_tokenName: tokenName, _symbol: symbol,_owner: owner)
         }
 
         init(details: Details) {
@@ -245,6 +286,7 @@ pub contract SocialToken: FungibleToken {
     }
 
 
+
     //////////////////////////////
     /// PUBLIC PRICE FUNCTIONS ///
     //////////////////////////////
@@ -257,18 +299,38 @@ pub contract SocialToken: FungibleToken {
             amount > 0.0: "Amount must be greator than zero"
         }
 
-        let supply = SocialToken.totalSupply
+        let supply = SocialToken.totalSupply 
         if supply == 0.0 {
-            return (SocialToken.slope * amount)
+            return (SocialToken.slope * amount) // 
         } else {
         // new supply value after adding amount
             let newSupply = supply + amount
+
             var _reserve = SocialToken.reserve;
+
             return (((_reserve * newSupply * newSupply) / (supply * supply)) - _reserve)
         }
     }
 
-    /// @dev Calculate collateral received on burn
+    //////////////////////////////
+    /// PUBLIC POWER FUNCTIONS ///
+    //////////////////////////////
+
+    /// @dev Calculate power of value
+    /// @param power (Int): how much power of value 
+    /// @param value (Int): base of power 
+    /// @return (uint256): Collateral required to mint social token amount
+    access(all) fun power(power:UInt,value:UInt): UInt {
+        var i:UInt = 0
+        var sum:UInt = 1
+        while(i < power) {
+            i = i+1
+            sum = (value*sum)
+        }
+        return sum
+    }
+
+       /// @dev Calculate collateral received on burn
     /// @param amount (UFix64): Amount of social tokens to burn
     /// @return (UFix64): Collateral received if input social token amount is burned
     pub fun getBurnPrice(amount: UFix64): UFix64{
@@ -312,32 +374,50 @@ pub contract SocialToken: FungibleToken {
                 (amount + SocialToken.totalSupply) < SocialToken.maximumSupply: "You have reached the maximum Supply"
             }
 
+            // Check Remaining User Balance
             var remainingFUSD = 0.0
-            var remainingSocialToken = 0.0
             // collateral required to mint social tokens amount
             var mintPrice:UFix64 = SocialToken.getMintPrice(amount: amount)
 
+            // Check Balance of payment
             if (fusdPayment.balance >= mintPrice) {
                 var totalPayment = fusdPayment.balance
-                assert(totalPayment>=mintPrice, message: "No payment yet")
+                assert(totalPayment>=mintPrice, message: "No payment yet") // Check User Payment and Price of token
+
+                // Give Back Extra User Balance
                 let extraAmount = totalPayment-mintPrice
                 if(extraAmount > 0.0){
-                    //Create Vault of extra amount and deposit back to user
+                    //Create Vault of extra amount to  
                     totalPayment=totalPayment-extraAmount
                     let remainingAmountVault <- fusdPayment.withdraw(amount: extraAmount)
                     let remainingVault = receiverVault.borrow()!
                     remainingVault!.deposit(from: <- remainingAmountVault)
                 }
+
                 SocialToken.totalSupply = SocialToken.totalSupply + amount
+
+                // Check Artist Reward Limit
+                let result = (UInt(SocialToken.SocialTokenPreAllocation.initialRewardLimit)*(SocialToken.power(power: SocialToken.SocialTokenPreAllocation.completedMilestones, value: 10)))
+                if SocialToken.SocialTokenPreAllocation.completedMilestones != SocialToken.SocialTokenPreAllocation.totalMilestones  && 
+                    SocialToken.totalSupply > UFix64(result) && SocialToken.SocialTokenPreAllocation.rewardedTokens != 0.0 {
+                    let reward <-create Vault(balance: SocialToken.SocialTokenPreAllocation.rewardedTokens)  
+                    let vaultRef = getAccount(SocialToken.SocialTokenPreAllocation.address)
+                        .getCapability<&SocialToken.Vault{FungibleToken.Receiver}>(/public/socialTokenReceiver)
+                    
+                    vaultRef.borrow()!.deposit(from: <- reward)
+                    SocialToken.SocialTokenPreAllocation.completedMilestones = SocialToken.SocialTokenPreAllocation.completedMilestones + 1
+                }
+
+                // Distribute Fees to stakeholders and add Remaining Balance to Pool
                 let fusdPaymentRemaining <-! SocialToken.distributeFee(fusdPayment:<-fusdPayment,amount:totalPayment)  
                 let receiver = self.pool.receiver.borrow()! 
                 SocialToken.reserve = SocialToken.reserve + totalPayment -(mintPrice-fusdPaymentRemaining.balance)
-                // add remaining payment to pool
                 let payment <- fusdPaymentRemaining.withdraw(amount: fusdPaymentRemaining.balance)
                 receiver!.deposit(from: <- payment)
                 destroy fusdPaymentRemaining
-                // event emit having social token amount
+                // Emit event having social token amount
                 emit TokensMinted(amount: amount)
+                // Return Vault of Social Token
                 return <-create Vault(balance: amount)
             }
             return <- fusdPayment
@@ -413,9 +493,11 @@ pub contract SocialToken: FungibleToken {
             // change function and use getburn
             let paymentAmount = SocialToken.getBurnPrice(amount: vault.balance)
             SocialToken.reserve = SocialToken.reserve - paymentAmount
+
             let payment <- provider!.withdraw(amount: paymentAmount)
-           //SocialToken.totalSupply = SocialToken.totalSupply - vault.balance
+            SocialToken.totalSupply = SocialToken.totalSupply - vault.balance
             
+
             emit TokensBurned(amount: vault.balance)
             destroy vault
             return <- payment
@@ -498,7 +580,7 @@ pub contract SocialToken: FungibleToken {
         ///
         /// Function that creates a fee variable
         ///
-        pub fun setFeeStructure(address: Address, value:{String:AnyStruct}, ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>){
+        pub fun setFeeStructure(address: Address, value:{String:AnyStruct}, ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>) {
             pre {
                 address != nil : "Address must not be nil"
                 value != nil :"Fee Detail must not be nil"            
@@ -508,10 +590,24 @@ pub contract SocialToken: FungibleToken {
             SocialToken.walletVaults[address] = ownerVault
         }     
 
-        pub fun changeSlope(slope:UFix64){
-            pre{
+        // initlialize Pre Allocation
+        pub fun setPreAllocation(address:Address, initialRewardLimit: UFix64, rewardedTokens: UFix64, milestones: UInt, ownerVault: Capability<&AnyResource{FungibleToken.Receiver}>) {                          
+             pre {
+                rewardedTokens > 0.0
+                milestones > 0
+                address != nil
+            }
+
+            // Initialize
+            SocialToken.SocialTokenPreAllocation = SocialToken.PreAllocation(_address: address, _initialRewardLimit: initialRewardLimit, _rewardedTokens: rewardedTokens,
+            _milestone: milestones, _receiverVault: ownerVault)
+        }
+
+        pub fun changeSlope(slope:UFix64) {
+            pre {
                 slope > 0.0
             }
+            // Initialize Slope
             SocialToken.slope = slope
         }
 
@@ -523,9 +619,24 @@ pub contract SocialToken: FungibleToken {
         self.mintQuote = 2.0
         self.reserve = 0.0
         self.slope = 0.00005
+        var artistAddress: Address = 0x05
+
+
         self.feeSplitterDetail = {}
         self.walletVaults = {}
-                                                                
+
+        var preAllocationReceiver = getAccount(artistAddress)
+            .getCapability<&AnyResource{FungibleToken.Receiver}>(/public/socialTokenReceiver)!
+
+        // Initialise SocialTokenPreAllocation with the Details Constructor
+        self.SocialTokenPreAllocation = PreAllocation ( 
+        _address: artistAddress, 
+        _initialRewardLimit: 10000.0,
+        _rewardedTokens: 1000.0, 
+        _milestone: 5,
+        _receiverVault: preAllocationReceiver 
+         )  
+                                  
         self.AdminStoragePath = /storage/socialTokenAdmin
         self.MinterProxyPublicPath = /public/socialTokenMinterProxy
         self.MinterProxyStoragePath = /storage/socialTokenMinterProxy
@@ -575,12 +686,17 @@ pub contract SocialToken: FungibleToken {
             _receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
             _provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider)
             )
-        
+
+      
+
         //Initialise SocialTokenDetails with the Details Constructor
-        self.SocialTokenDetails = Details(
+        self.SocialTokenDetails = Details (
             _tokenName: "",
-            _symbol: ""
+            _symbol: "",
+            _owner: self.account.address
         )
+
+      
 
         let admin <- create Administrator()
         self.account.save(<-admin, to: /storage/socialTokenAdmin)
