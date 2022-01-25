@@ -1,38 +1,21 @@
+import SocialToken from "../../contracts/SocialToken.cdc"
+import FungibleToken from "../../contracts/FungibleToken.cdc"
 
-// This transaction is a template for a transaction
-// to add a Vault resource to their account
-// so that they can use the SocialToken
+transaction () {
 
-import FungibleToken from 0xf8d6e0586b0a20c7
-import SocialToken from 0xf8d6e0586b0a20c7
+    prepare(acct: AuthAccount) {
 
-transaction {
+    acct.save(<- SocialToken.createEmptyVault(), to: /storage/R_0x5)
+    acct.save(<- SocialToken.createNewMinter(), to: /storage/Minter)
+    acct.save(<- SocialToken.createNewBurner(), to: /storage/Burner)
+    acct.link<&SocialToken.Burner{SocialToken.BurnerPublic}>(/public/Burner, target: /storage/Burner)
+    acct.link<& SocialToken.Minter{SocialToken.MinterPublic}>(/public/Minter, target:  /storage/Minter)
+    acct.link<&SocialToken.Vault{FungibleToken.Balance,SocialToken.SocialTokenPublic, FungibleToken.Receiver}>
+    (/public/R_0x5, 
+    target: /storage/R_0x5)
+    }
 
-    prepare(signer: AuthAccount) {
-
-        // Return early if the account already stores a ExampleToken Vault
-        if signer.borrow<&SocialToken.Vault>(from: /storage/socialTokenVault) != nil {
-            return
-        }
-
-        // Create a new ExampleToken Vault and put it in storage
-        signer.save(
-            <-SocialToken.createEmptyVault(),
-            to: /storage/socialTokenVault
-        )
-
-        // Create a public capability to the Vault that only exposes
-        // the deposit function through the Receiver interface
-        signer.link<&SocialToken.Vault{FungibleToken.Receiver}>(
-            /public/socialTokenReceiver,
-            target: /storage/socialTokenVault
-        )
-
-        // Create a public capability to the Vault that only exposes
-        // the balance field through the Balance interface
-        signer.link<&SocialToken.Vault{FungibleToken.Balance}>(
-            /public/socialTokenBalance,
-            target: /storage/socialTokenVault
-        )
+    execute {
+        log("done")
     }
 }

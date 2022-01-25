@@ -1,5 +1,6 @@
 import FungibleToken from "./FungibleToken.cdc"
 import Controller from "./Controller.cdc"
+import FUSD from "./FUSD.cdc"
 
 pub contract SocialToken : FungibleToken{
 
@@ -33,7 +34,6 @@ pub contract SocialToken : FungibleToken{
             self.tokenId = tokenId
         }
         /*
-      
         */
         pub fun getTokenId():String{
             return self.tokenId
@@ -74,8 +74,30 @@ pub contract SocialToken : FungibleToken{
         pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment:@FungibleToken.Vault): @SocialToken.Vault
     }
     pub resource Minter:MinterPublic {
+        
 
-       pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment:@FungibleToken.Vault): @SocialToken.Vault {
+        priv fun distributeFee(_ tokenId : String, _ fusdPayment:@FUSD.Vault, _ amount:UFix64):@FUSD.Vault{
+
+            for  feeDetail in   Controller.allSocialTokens[tokenId]!.feeSplitterDetail.keys {
+            
+                let artistFeeDetail = Controller.allSocialTokens[tokenId]!.artist
+                let artistPercentage = 0.03
+                let artistFee = amount * artistPercentage
+
+                let adminFeeDetail = self.owner!.address
+                let adminPercentage = 0.15
+                let adminFee = amount * adminPercentage
+
+                let totalFee = artistFee + adminFee
+                
+                var payment <- fusdPayment.withdraw(amount:totalFee)
+                destroy payment
+            }
+                return <- fusdPayment
+            
+        }
+
+        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment:@FungibleToken.Vault): @SocialToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
                 Controller.allSocialTokens[tokenId]!=nil: "toke not registered"
@@ -89,9 +111,10 @@ pub contract SocialToken : FungibleToken{
             return <- tempraryVar
         }
 
+
     }
     pub resource interface BurnerPublic{
-     pub fun burnTokens(from: @FungibleToken.Vault) 
+        pub fun burnTokens(from: @FungibleToken.Vault) 
     }
     pub resource Burner : BurnerPublic {
         pub fun burnTokens(from: @FungibleToken.Vault) {

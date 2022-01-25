@@ -1,40 +1,37 @@
-import FungibleToken from 0xf8d6e0586b0a20c7
-import SocialToken from 0xf8d6e0586b0a20c7
-import FUSD from 0xf8d6e0586b0a20c7
+import SocialToken from "../../contracts/SocialToken.cdc"
+import FungibleToken from "../../contracts/FungibleToken.cdc"
 
-transaction(socialTokenAmount: UFix64, fusdPayment: UFix64) {
+transaction (amountArtistToken:UFix64,amountUsdToken:UFix64, to:Address){
 
+    let sentVault: @FungibleToken.Vault
 
-    let paymentVault: @FungibleToken.Vault
-    let tokenReceiver: &{FungibleToken.Receiver}
-    let minterProxy: &SocialToken.MinterProxy
-    let fusdReceiver: Capability<&AnyResource{FungibleToken.Receiver}>
+    prepare(acct: AuthAccount) {
 
-    prepare(signer: AuthAccount) {
+        // Get a reference to the signer's stored vault
+        let vaultRef = acct.borrow<&FungibleToken.Vault>(from:/storage/fusdVault)
+			?? panic("Could not borrow reference to the owner's Vault!")
 
-        //initialise variables
-        self.minterProxy = signer
-            .borrow<&SocialToken.MinterProxy>(from: SocialToken.MinterProxyStoragePath)
-            ?? panic ("could not borrow minter proxy from signer")
+        // Withdraw tokens from the signer's stored vault
+        self.sentVault <- vaultRef.withdraw(amount: amountUsdToken)
 
-        self.tokenReceiver = signer
-            .getCapability(/public/socialTokenReceiver)!
-            .borrow<&{FungibleToken.Receiver}>()
-            ?? panic("Unable to borrow Social Token receiver reference")
-
-        let fusdVault = signer.borrow<&FungibleToken.Vault>(from: /storage/fusdVault)
-            ?? panic("cannot borrow FUSD vault from account storage")
-        
-        self.paymentVault <- fusdVault.withdraw(amount: fusdPayment)
-
-        self.fusdReceiver = getAccount(signer.address)
-            .getCapability<&{FungibleToken.Receiver}>(/public/fusdReceiver)!
+        log(self.sentVault.balance)
     }
 
     execute {
-        let mintedVault <- self.minterProxy.mintTokens(amount: socialTokenAmount, fusdPayment: <- self.paymentVault, receiverVault: self.fusdReceiver)
-        self.tokenReceiver.deposit(from: <- mintedVault)
+        let minter =  getAccount(to)
+            .getCapability(/public/Minter)
+            .borrow<&{SocialToken.MinterPublic}>()
+			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
+        let x <-  minter.mintTokens("R_0x5",amountArtistToken,fusdPayment:<- self.sentVault)
 
-        // @TODO handle if not enough FUSD
+
+    let receiverRef =  getAccount(to)
+            .getCapability(/public/R_0x5)
+            .borrow<&SocialToken.Vault{FungibleToken.Receiver}>()
+			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
+        receiverRef.deposit(from: <-x)
+
+    log("successfuly deposit the amount in the receiver address")
+
     }
 }

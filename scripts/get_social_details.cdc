@@ -1,6 +1,5 @@
 
-import SocialToken from 0xf8d6e0586b0a20c7
-
-pub fun main(): SocialToken.Details {
-    return SocialToken.getTokenDetails()
+import Controller from "../contracts/Controller.cdc"
+pub fun main(): Controller.TokenStructure? {
+    return Controller.allSocialTokens["S_0x5"]
 }

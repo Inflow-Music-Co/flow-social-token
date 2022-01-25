@@ -11,7 +11,7 @@
 // an FUSD.MinterProxy resource. Use the setup_fusd_minter.cdc transaction to 
 // create a minter proxy in the minter account.
 
-import FUSD from 0xf8d6e0586b0a20c7
+import FUSD from "../../contracts/FUSD.cdc"
 
 transaction(minterAddress: Address) {
 

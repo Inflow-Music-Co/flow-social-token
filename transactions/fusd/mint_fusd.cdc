@@ -14,9 +14,8 @@
 // or initialize a new vault, use check_fusd_vault_setup.cdc and setup_fusd_vault.cdc
 // respectively.
 
-import FungibleToken from 0xf8d6e0586b0a20c7
-import FUSD from 0xf8d6e0586b0a20c7
-
+import FungibleToken from "../../contracts/FungibleToken.cdc"
+import FUSD from "../../contracts/FUSD.cdc"
 transaction(amount: UFix64, to: Address) {
 
     let tokenMinter: &FUSD.MinterProxy
@@ -28,7 +27,7 @@ transaction(amount: UFix64, to: Address) {
             ?? panic("No minter available")
 
         self.tokenReceiver = getAccount(to)
-            .getCapability(/public/fusdReceiver)!
+            .getCapability(/public/fusdReceiver)
             .borrow<&{FungibleToken.Receiver}>()
             ?? panic("Unable to borrow receiver reference")
     }

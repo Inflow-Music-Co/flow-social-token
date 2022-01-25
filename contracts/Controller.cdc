@@ -6,8 +6,6 @@ pub contract Controller {
     pub var allArtist :{Address:Artist}
 
     pub var AdminResourceStoragePath: StoragePath
-    
-    pub var ArtistInterfacePrivatePath: PrivatePath
 
 
     pub struct TokenStructure{
@@ -41,9 +39,12 @@ pub contract Controller {
             }
             self.issuedSupply = self.issuedSupply + amount
         }
-     
+        pub fun setFeeSpliterDetail(_ feeSplitterDetail:{Address:FeeStructure}){
+            pre {
+            }
+            self.feeSplitterDetail = feeSplitterDetail
+        }
     }
-   
     pub struct Artist {
         pub let address: Address
         pub let tokenIds:[String]
@@ -79,54 +80,28 @@ pub contract Controller {
         }
     }
 
-    pub resource interface ArtistCapability {
-        pub  fun addCapability(cap: Capability<&{ArtistInterface}>)
-    }
-
-    pub resource interface ArtistInterface{
-        pub fun registerToken(_ symbol:String, _ maxSupply:UFix64, _ feeSplitterDetail:{Address:FeeStructure})
-    }
 
 
-    pub resource ArtistResource :ArtistCapability, ArtistInterface {
+    pub resource Admin {
 
-        access(contract) var capability: Capability<&{ArtistInterface}>?
-
-        pub fun addCapability(cap: Capability<&{ArtistInterface}>) {
-            pre {
-                // we make sure the SpecialCapability is 
-                // valid before executing the method
-                cap.borrow() != nil: "could not borrow a reference to the SpecialCapability"
-                self.capability == nil: "resource already has the SpecialCapability"
-            }
-            // add the SpecialCapability
- 
-            self.capability = cap
-
-        }
-
-        pub fun registerToken( _ symbol:String, _ maxSupply:UFix64, _ feeSplitterDetail:{Address:FeeStructure}){
+        pub fun registerToken( _ symbol:String, _ maxSupply:UFix64, _ feeSplitterDetail:{Address:FeeStructure}, _ artist:Address){
             pre{
-            
-                self.capability != nil: "I don't have the special capability :("
                 symbol !=nil: "symbol must not be null"
                 maxSupply >0.0:"max supply must be greater than zero"
             }
-            let artistAddress = self.owner!.address
+            let artistAddress = artist
+
             //let tokenId = (artistAddress.toString().concat("_")).concat(symbol)
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString())            
             assert(Controller.allSocialTokens[tokenId]==nil, message: "token already registered")
             Controller.allSocialTokens[tokenId] = Controller.TokenStructure(tokenId, symbol,maxSupply,artistAddress )
+            Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
         }
         init(){
-            self.capability = nil
         }
 
     }
     
-    pub fun createAdminResource(): @ArtistResource{
-        return <- create ArtistResource()    
-    }
 
 
     pub fun distributeFee(_ fusdPayment:@FungibleToken.Vault, _ amount:UFix64, _ tokenId:String):@FungibleToken.Vault{
@@ -146,11 +121,9 @@ pub contract Controller {
         self.allSocialTokens = {}
         self.allArtist = {}
         self.AdminResourceStoragePath = /storage/ControllerAdmin
-        self.ArtistInterfacePrivatePath = /private/ControllerArtist
 
-        self.account.save<@ArtistResource>(<- create ArtistResource(), to : self.AdminResourceStoragePath)
-        self.account.link<&{ArtistInterface}>(self.ArtistInterfacePrivatePath, target: self.AdminResourceStoragePath)
-
+        self.account.save<@Admin>(<- create Admin(), to : self.AdminResourceStoragePath)
+    
     }
 
 }
