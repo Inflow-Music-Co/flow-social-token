@@ -20,8 +20,9 @@ transaction(amount: UFix64, to: Address) {
 
     let tokenMinter: &FUSD.MinterProxy
     let tokenReceiver: &{FungibleToken.Receiver}
-
+    
     prepare(minterAccount: AuthAccount) {
+
         self.tokenMinter = minterAccount
             .borrow<&FUSD.MinterProxy>(from: FUSD.MinterProxyStoragePath)
             ?? panic("No minter available")
@@ -33,8 +34,10 @@ transaction(amount: UFix64, to: Address) {
     }
 
     execute {
+
         let mintedVault <- self.tokenMinter.mintTokens(amount: amount)
 
         self.tokenReceiver.deposit(from: <-mintedVault)
+        log("done")
     }
 }

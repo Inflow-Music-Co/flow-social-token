@@ -45,10 +45,11 @@ transaction(minterAddress: Address) {
 
         let capabilityReceiver = minterAccount.getCapability
             <&FUSD.MinterProxy{FUSD.MinterProxyPublic}>
-            (FUSD.MinterProxyPublicPath)!
+            (FUSD.MinterProxyPublicPath)
             .borrow() ?? panic("Could not borrow capability receiver reference")
 
         capabilityReceiver.setMinterCapability(cap: self.minterCapability)
-    }
+            log("done")
 
+    }
 }

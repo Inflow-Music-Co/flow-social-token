@@ -1,8 +1,9 @@
 // This script reads the mintQuote field of Admin's Minter Resource
 
-import FungibleToken from 0xf8d6e0586b0a20c7
-import SocialToken from 0xf8d6e0586b0a20c7
+import Controller from "../contracts/Controller.cdc"
 
-pub fun main(amount: UFix64): UFix64 {
-    return SocialToken.getBurnPrice(amount: amount)
+pub fun main(amount: UFix64, tokenId: String):UFix64{
+
+    return Controller.getBurnPrice(tokenId, amount)
+
 }

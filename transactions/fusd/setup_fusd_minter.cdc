@@ -5,7 +5,7 @@
 // must run deposit_fusd_minter.cdc to deposit a minter resource
 // inside the minter proxy.
 
-import FUSD from 0xf8d6e0586b0a20c7
+import FUSD from "../../contracts/FUSD.cdc"
 
 transaction {
 
@@ -22,5 +22,6 @@ transaction {
             FUSD.MinterProxyPublicPath,
             target: FUSD.MinterProxyStoragePath
         )
+        log("done")
     }
 }

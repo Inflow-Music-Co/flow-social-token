@@ -4,7 +4,7 @@ import Controller from "../../contracts/Controller.cdc"
 import SocialToken from "../../contracts/SocialToken.cdc"
 
 
-transaction ( maxSupply:UFix64, artistAddress:Address){
+transaction (maxSupply: UFix64, artistAddress: Address){
     prepare(acct: AuthAccount) {
         let adminResource = acct.borrow<&Controller.Admin>(from:Controller.AdminResourceStoragePath)
             ??panic("could not borrow a reference to the admin")

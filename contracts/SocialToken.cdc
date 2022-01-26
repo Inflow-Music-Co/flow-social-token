@@ -10,35 +10,31 @@ pub contract SocialToken : FungibleToken{
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
     pub event TokensDeposited(amount: UFix64, to: Address?)
 
-    
+    pub var collateralPool: FUSDPool
     pub resource interface SocialTokenPublic{
-        pub fun getTokenId():String
-    
+        pub fun getTokenId():String 
     }
 
     pub resource Vault : SocialTokenPublic, FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance {
 
-        pub var balance : UFix64
+        pub var balance: UFix64
         pub var tokenId: String
 
 
-        init(balance:UFix64){
+        init(balance: UFix64){
             self.balance = balance
             self.tokenId = ""
 
         }
-        pub fun setTokenId(_ tokenId:String){
+        pub fun setTokenId(_ tokenId: String){
             pre{
                 tokenId !=nil: "token id must not be nil"
             }
             self.tokenId = tokenId
         }
-        /*
-        */
-        pub fun getTokenId():String{
+        pub fun getTokenId(): String{
             return self.tokenId
         }
-
         pub fun deposit(from : @FungibleToken.Vault){
             let vault <- from as! @SocialToken.Vault
             self.balance = self.balance + vault.balance                        
@@ -70,34 +66,51 @@ pub contract SocialToken : FungibleToken{
     pub fun createNewBurner():@Burner{
         return <- create Burner()
     }
-    pub resource interface MinterPublic{
-        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment:@FungibleToken.Vault): @SocialToken.Vault
-    }
-    pub resource Minter:MinterPublic {
+
+    pub struct FUSDPool {
         
+        pub let receiver: Capability<&{FungibleToken.Receiver}>
 
-        priv fun distributeFee(_ tokenId : String, _ fusdPayment:@FUSD.Vault, _ amount:UFix64):@FUSD.Vault{
+        pub let provider: Capability<&{FungibleToken.Provider}>
 
-            for  feeDetail in   Controller.allSocialTokens[tokenId]!.feeSplitterDetail.keys {
-            
-                let artistFeeDetail = Controller.allSocialTokens[tokenId]!.artist
-                let artistPercentage = 0.03
-                let artistFee = amount * artistPercentage
+        pub let balance : Capability<&{FungibleToken.Balance}>
 
-                let adminFeeDetail = self.owner!.address
-                let adminPercentage = 0.15
-                let adminFee = amount * adminPercentage
+        init(
+            _receiver: Capability<&{FungibleToken.Receiver}>, 
+            _provider: Capability<&{FungibleToken.Provider}>,
+            _balance : Capability<&{FungibleToken.Balance}>
+            ) {
+            self.receiver = _receiver
+            self.provider = _provider
+            self.balance = _balance
+        }
+    }
+    pub resource interface MinterPublic{
+        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault): @SocialToken.Vault
+    }
+    access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault{
+            let amount = fusdPayment.balance
+            for  address in   Controller.allSocialTokens[tokenId]!.feeSplitterDetail.keys {
+                log(address)
+                let feeStructer = Controller.allSocialTokens[tokenId]!.feeSplitterDetail[address]
 
-                let totalFee = artistFee + adminFee
+                let tempAmmount = amount * feeStructer!.percentage
+                let tempraryVault <- fusdPayment.withdraw(amount:tempAmmount)
+
+                let account = getAccount(address)
+
+                let depositSigner= account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
+                .borrow()
+                ??panic("could not borrow")
                 
-                var payment <- fusdPayment.withdraw(amount:totalFee)
-                destroy payment
-            }
+                depositSigner.deposit(from:<- tempraryVault)
+                }
                 return <- fusdPayment
             
         }
+    pub resource Minter:MinterPublic {
 
-        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment:@FungibleToken.Vault): @SocialToken.Vault {
+        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault): @SocialToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
                 Controller.allSocialTokens[tokenId]!=nil: "toke not registered"
@@ -106,26 +119,54 @@ pub contract SocialToken : FungibleToken{
             let tempraryVar  <- create SocialToken.Vault(balance: amount)
             tempraryVar.setTokenId(tokenId)
             Controller.allSocialTokens[tokenId]!.incrementIssuedSupply(amount)
+            let remainingAmount <-   SocialToken.distributeFee(tokenId,  <- fusdPayment)
+
             SocialToken.totalSupply = SocialToken.totalSupply + amount
-            destroy   fusdPayment
+            log(remainingAmount.balance)
+            SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             return <- tempraryVar
         }
 
 
     }
     pub resource interface BurnerPublic{
-        pub fun burnTokens(from: @FungibleToken.Vault) 
+        pub fun burnTokens(from: @FungibleToken.Vault) : @FungibleToken.Vault
     }
     pub resource Burner : BurnerPublic {
-        pub fun burnTokens(from: @FungibleToken.Vault) {
+        pub fun burnTokens(from: @FungibleToken.Vault): @FungibleToken.Vault{
             let vault <- from as! @SocialToken.Vault
-            let amount = vault.balance
+            let amountt = vault.balance
             destroy vault
+        log(amountt)
+            return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:amountt)
         }
     }
 
     init(){
         self.totalSupply = 0.0
+        let vault <-FUSD.createEmptyVault()
+    
+        self.account.save(<-vault, to:/storage/fusdVault)
+    
+        self.account.link<&FUSD.Vault{FungibleToken.Receiver}>(
+                /public/fusdReceiver,
+                target: /storage/fusdVault
+        )
+
+        self.account.link<&FUSD.Vault{FungibleToken.Balance}>(
+            /public/fusdBalance,
+            target: /storage/fusdVault
+        )
+        self.account.link<&FUSD.Vault{FungibleToken.Provider}>(
+            /private/fusdProvider,
+            target: /storage/fusdVault
+        )
+
+        self.collateralPool = FUSDPool(
+            _receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
+            _provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider),
+            _balance : self.account.getCapability<&FUSD.Vault{FungibleToken.Balance}>(/public/fusdBalance)
+        )
 
         self.account.save(<- create Minter(), to: /storage/Minter)
         emit TokensInitialized(initialSupply:self.totalSupply)
