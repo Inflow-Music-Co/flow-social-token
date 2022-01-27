@@ -3,5 +3,5 @@ transaction(test:String) {
   prepare(acct: AuthAccount, account2: AuthAccount) {
     log(acct)
     log(account2)
- }
+  }
 }

@@ -1,4 +1,4 @@
-import NonFungibleToken from "../contracts/NonFungibleToken.cdc"
+import NonFungibleToken from "../../contracts/NonFungibleToken.cdc"
 
 // This transaction creates an empty NFT Collection in the signer's account
 transaction {
