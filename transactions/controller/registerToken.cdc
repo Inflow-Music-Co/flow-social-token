@@ -1,7 +1,7 @@
-import FungibleToken from "../../contracts/FungibleToken.cdc"
-import FUSD from "../../contracts/FUSD.cdc"
-import Controller from "../../contracts/Controller.cdc"
-import SocialToken from "../../contracts/SocialToken.cdc"
+import FungibleToken from 0x01cf0e2f2f715450
+import Controller from 0xf3fcd2c1a78f5eee
+import FUSD from 0x179b6b1cb6755e31
+import SocialToken from 0xe03daebed8ca0615
 
 
 transaction (maxSupply: UFix64, artistAddress: Address){
@@ -11,9 +11,9 @@ transaction (maxSupply: UFix64, artistAddress: Address){
 
             let feeSplitterDetail: {Address:Controller.FeeStructure} = {
             acct.address: Controller.FeeStructure(0.03),
-            artistAddress: Controller.FeeStructure(0.15)
+            artistAddress: Controller.FeeStructure(0.07)
             }
-            let symbol = "S"
+            let symbol = "N"
 
         adminResource.registerToken(symbol, maxSupply, feeSplitterDetail,artistAddress)
         log("token registered")

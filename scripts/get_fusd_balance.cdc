@@ -7,8 +7,8 @@
 // To check if an account has a vault or initialize a new vault, 
 // use check_fusd_vault_setup.cdc and setup_fusd_vault.cdc respectively.
 
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import FUSD from "../contracts/FUSD.cdc"
+import FungibleToken from 0x01cf0e2f2f715450
+import FUSD from 0x179b6b1cb6755e31
 
 pub fun main(address: Address): UFix64 {
     let account = getAccount(address)

@@ -1,6 +1,6 @@
-import FungibleToken from "./FungibleToken.cdc"
-import Controller from "./Controller.cdc"
-import FUSD from "./FUSD.cdc"
+import FungibleToken from 0x01cf0e2f2f715450
+import Controller from 0xf3fcd2c1a78f5eee
+import FUSD from 0x179b6b1cb6755e31
 
 pub contract SocialToken : FungibleToken{
 
@@ -46,10 +46,10 @@ pub contract SocialToken : FungibleToken{
         pub fun withdraw(amount: UFix64): @FungibleToken.Vault {
             self.balance = self.balance - amount
             let vault <- create Vault(balance:amount)
+            vault.setTokenId(self.tokenId)
             emit TokensWithdrawn(amount:amount, from: self.owner!.address)
             return <- vault
         }
-
         destroy () {
             log(self.tokenId)
             SocialToken.totalSupply = SocialToken.totalSupply - self.balance
@@ -173,3 +173,4 @@ pub contract SocialToken : FungibleToken{
     }
 
 }
+ 

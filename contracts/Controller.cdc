@@ -1,8 +1,10 @@
-import FungibleToken from "./FungibleToken.cdc"
+import FungibleToken from 0x01cf0e2f2f715450
 pub contract Controller {
 
     pub var allSocialTokens : {String:TokenStructure}
     pub var allArtist : {Address:Artist}
+
+    pub event TokenRegistered(_ symbol:String, _ maxSupply: UFix64, _ artist: Address)
 
     pub var AdminResourceStoragePath: StoragePath
 
@@ -42,9 +44,7 @@ pub contract Controller {
             }
             self.feeSplitterDetail = feeSplitterDetail
         }
-     
     }
-   
     pub struct Artist {
         pub let address: Address
         pub let tokenIds: [String]
@@ -53,8 +53,6 @@ pub contract Controller {
 
             self.address = address
             self.tokenIds = []
-        
-        
         }
         pub fun addToken(_ tokenId: String){
             pre {
@@ -79,7 +77,6 @@ pub contract Controller {
             self.percentage = percentage
         }
     }
-   
 
 
 
@@ -96,8 +93,8 @@ pub contract Controller {
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString())            
             assert(Controller.allSocialTokens[tokenId]==nil, message: "token already registered")
             Controller.allSocialTokens[tokenId] = Controller.TokenStructure(tokenId, symbol,maxSupply,artistAddress )
+            emit TokenRegistered(tokenId,maxSupply,artistAddress)
             Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
-           
         }
         init(){
         }
@@ -146,9 +143,6 @@ pub contract Controller {
         self.allSocialTokens = {}
         self.allArtist = {}
         self.AdminResourceStoragePath = /storage/ControllerAdmin
-
         self.account.save<@Admin>(<- create Admin(), to : self.AdminResourceStoragePath)
-    
     }
-
 }
