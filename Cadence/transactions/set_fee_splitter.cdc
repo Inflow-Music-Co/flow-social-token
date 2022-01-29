@@ -1,8 +1,9 @@
 // This transaction creates a fee structure and
 // us this structure while miniting for distribution.
-import FungibleToken from 0xf8d6e0586b0a20c7
-import SocialToken from 0xf8d6e0586b0a20c7
-import FUSD from 0xf8d6e0586b0a20c7
+import FungibleToken from "../../contracts/FungibleToken.cdc"
+import SocialToken from "../../contracts/SocialToken.cdc"
+import FUSD from "../../contracts/FUSD.cdc"
+
 
 transaction(receiverAddress: Address, percentage: UFix64) {
 

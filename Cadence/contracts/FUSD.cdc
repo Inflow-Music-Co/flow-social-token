@@ -1,4 +1,4 @@
-import FungibleToken from 0x01cf0e2f2f715450
+import FungibleToken from "./FungibleToken.cdc"
 
 pub contract FUSD: FungibleToken {
 

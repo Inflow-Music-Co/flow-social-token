@@ -4,8 +4,10 @@
 //
 // The withdraw amount and the account from getAccount
 // would be the parameters to the transaction
-import SocialToken from 0xe03daebed8ca0615
-import FungibleToken from 0x01cf0e2f2f715450
+import FungibleToken from "../contracts/FungibleToken.cdc"
+import SocialToken from "../contracts/SocialToken.cdc"
+
+
 
 transaction(amount: UFix64,to:Address) {
 
@@ -15,7 +17,7 @@ transaction(amount: UFix64,to:Address) {
     prepare(signer: AuthAccount) {
 
         // Get a reference to the signer's stored vault
-        let vaultRef = signer.borrow<&SocialToken.Vault>(from: /storage/N_0x8)
+        let vaultRef = signer.borrow<&SocialToken.Vault>(from: /storage/N_0x6)
 			?? panic("Could not borrow reference to the owner's Vault!")
 
         // Withdraw tokens from the signer's stored vault
@@ -28,12 +30,10 @@ transaction(amount: UFix64,to:Address) {
 
     execute {
 
-        //Token-Sym
-        //Token-Id: {symbol}
 
         // Get a reference to the recipient's Receiver
         let receiverRef =  getAccount(to)
-            .getCapability(/public/N_0x8)
+            .getCapability(/public/N_0x6)
             .borrow<&{FungibleToken.Receiver}>()
 			?? panic("Could not borrow receiver reference to the recipient's Vault")
 //

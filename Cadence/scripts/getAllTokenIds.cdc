@@ -1,5 +1,5 @@
 
-import Controller from 0xf3fcd2c1a78f5eee
+import Controller from "../contracts/Controller.cdc"
 pub fun main():[String]{
     return Controller.allSocialTokens.keys
 
