@@ -32,4 +32,8 @@ burn-with-collateral:
 get-social-details:
 	go run ./tasks/get_social_details/main.go
 
+.PHONY: register-tokens
+register-token:
+	go run ./tasks/register_token/main.go
+
 

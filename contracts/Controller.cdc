@@ -1,4 +1,5 @@
-import FungibleToken from "./FungibleToken.cdc"
+import FungibleToken from 0xee82856bf20e2aa6
+
 pub contract Controller {
 
     pub var allSocialTokens : {String:TokenStructure}

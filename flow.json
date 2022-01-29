@@ -8,10 +8,17 @@
 	},
 	"contracts": {
 		"Debug": "./contracts/Debug.cdc",
+		"Controller": {
+			"source": "./contracts/Controller.cdc",
+			"aliases": {
+				"emulator": "0xf8d6e0586b0a20c7",
+				"testnet": "0x7e60df042a9c0868"
+			}
+		},
 		"SocialToken": {
 			"source": "./contracts/SocialToken.cdc",
 			"aliases": {
-				"emulator": "0x0ae53cb6e3f42a79",
+				"emulator": "0xf8d6e0586b0a20c7",
 				"testnet": "0x7e60df042a9c0868"
 			}
 		},
@@ -25,7 +32,7 @@
 		"FUSD": {
 			"source": "./contracts/FUSD.cdc",
 			"aliases": {
-				"emulator": "0x0ae53cb6e3f42a79",
+				"emulator": "0xf8d6e0586b0a20c7",
 				"testnet": "0x7e60df042a9c0868"
 			}
 		}
@@ -66,8 +73,8 @@
 			"emulator-account": [
 				"FungibleToken",
 				"FUSD",
-				"SocialToken"
-				
+				"Controller",
+				"SocialToken"				
 			],
 			"emulator-first": [],
 			"emulator-second": []

@@ -1,6 +1,6 @@
-import FungibleToken from "./FungibleToken.cdc"
-import Controller from "./Controller.cdc"
-import FUSD from "./FUSD.cdc"
+import FungibleToken from 0xee82856bf20e2aa6
+import Controller from 0xf8d6e0586b0a20c7
+import FUSD from 0xf8d6e0586b0a20c7
 
 pub contract SocialToken : FungibleToken{
 
