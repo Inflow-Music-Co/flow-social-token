@@ -26,7 +26,7 @@ transaction (amountArtistToken: UFix64, amountUsdToken: UFix64){
             .getCapability(/public/Minter)
             .borrow<&{SocialToken.MinterPublic}>()
 			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
-        let x <-  minter.mintTokens("S_0x5",amountArtistToken,fusdPayment:<- self.sentVault)
+        let x <-  minter.mintTokens("TestSymbol_0x1cf0e2f2f715450",amountArtistToken,fusdPayment:<- self.sentVault)
 
 
         let receiverRef =  getAccount(self.trxAddress)
@@ -35,7 +35,7 @@ transaction (amountArtistToken: UFix64, amountUsdToken: UFix64){
 			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
         receiverRef.deposit(from: <-x)
 
-    log("successfuly deposit the amount in the receiver address")
+        log("successfuly deposit the amount in the receiver address")
 
     }
 }

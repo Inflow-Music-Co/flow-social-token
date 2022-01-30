@@ -6,17 +6,25 @@
 // inside the minter proxy.
 
 import SocialToken from 0xf8d6e0586b0a20c7
+import FungibleToken from 0xee82856bf20e2aa6
+import Controller from 0xf8d6e0586b0a20c7
 
-transaction {
-    prepare(minter: AuthAccount) {
+transaction (tokenId: String) {
 
-        let minterProxy <- SocialToken.createMinterProxy()
+  prepare(acct: AuthAccount) {
 
-        minter.save(<- minterProxy, to: SocialToken.MinterProxyStoragePath)
+    acct.save(<- SocialToken.createEmptyVault(), to: Controller.allSocialTokens[tokenId]!.tokenResourceStoragePath)
+    acct.save(<- SocialToken.createNewMinter(), to: /storage/SMinter)
+    acct.save(<- SocialToken.createNewBurner(), to: /storage/SBurner)
+    acct.link<&SocialToken.Burner{SocialToken.BurnerPublic}>(/public/SBurner, target: /storage/SBurner)
+    acct.link<& SocialToken.Minter{SocialToken.MinterPublic}>(/public/SMinter, target:  /storage/SMinter)
+    acct.link<&SocialToken.Vault{FungibleToken.Balance, SocialToken.SocialTokenPublic, FungibleToken.Receiver}>
+    (Controller.allSocialTokens[tokenId]!.tokenResourcePublicPath, 
+    target: Controller.allSocialTokens[tokenId]!.tokenResourceStoragePath)
+  }
 
-        minter.link<&SocialToken.MinterProxy{SocialToken.MinterProxyPublic}>(
-            SocialToken.MinterProxyPublicPath,
-            target: SocialToken.MinterProxyStoragePath
-        )
-    }
+  execute {
+ 
+  log("done")
+  }
 }

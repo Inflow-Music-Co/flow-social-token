@@ -5,9 +5,11 @@ pub contract Controller {
     pub var allSocialTokens : {String:TokenStructure}
     pub var allArtist : {Address:Artist}
 
+    pub event TokenRegistered(_ tokenId:String, _ maxSupply: UFix64, _ artist: Address)
+
     pub var AdminResourceStoragePath: StoragePath
 
-    pub struct TokenStructure{
+    pub struct TokenStructure {
         pub var tokenId: String
         pub var symbol: String
         pub var issuedSupply: UFix64
@@ -17,10 +19,10 @@ pub contract Controller {
         pub var feeSplitterDetail : {Address:FeeStructure}
         pub var mintQoute: UFix64
         pub var reserve: UFix64
-
+        pub var tokenResourceStoragePath: StoragePath
+        pub var tokenResourcePublicPath: PublicPath
     
-
-        init(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address){
+        init(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address, tokenStoragePath:StoragePath, tokenPublicPath:PublicPath){
             self.tokenId = tokenId
             self.symbol = symbol
             self.issuedSupply = 0.0
@@ -30,6 +32,8 @@ pub contract Controller {
             self.feeSplitterDetail = {}
             self.mintQoute = 0.0
             self.reserve = 0.0
+            self.tokenResourceStoragePath = tokenStoragePath
+            self.tokenResourcePublicPath = tokenPublicPath
         }
 
         pub fun incrementIssuedSupply(_ amount: UFix64){
@@ -43,9 +47,7 @@ pub contract Controller {
             }
             self.feeSplitterDetail = feeSplitterDetail
         }
-     
     }
-   
     pub struct Artist {
         pub let address: Address
         pub let tokenIds: [String]
@@ -54,8 +56,6 @@ pub contract Controller {
 
             self.address = address
             self.tokenIds = []
-        
-        
         }
         pub fun addToken(_ tokenId: String){
             pre {
@@ -73,20 +73,19 @@ pub contract Controller {
             self.percentage = percentage
         }
 
-        pub fun updatePercentage(_ percentage: UFix64){ 
+        access(account) fun updatePercentage(_ percentage: UFix64){ 
             pre {
                 percentage >0.0: "Percentage should be greater than zero"
             }
             self.percentage = percentage
         }
     }
-   
 
 
 
     pub resource Admin {
 
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address){
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address, tokenStoragePath:StoragePath, tokenPublicPath:PublicPath){
             pre{
                 symbol !=nil: "symbol must not be null"
                 maxSupply > 0.0: "max supply must be greater than zero"
@@ -96,9 +95,9 @@ pub contract Controller {
             //let tokenId = (artistAddress.toString().concat("_")).concat(symbol)
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString())            
             assert(Controller.allSocialTokens[tokenId]==nil, message: "token already registered")
-            Controller.allSocialTokens[tokenId] = Controller.TokenStructure(tokenId, symbol,maxSupply,artistAddress )
+            Controller.allSocialTokens[tokenId] = Controller.TokenStructure(tokenId, symbol, maxSupply, artistAddress, tokenStoragePath, tokenPublicPath)
+            emit TokenRegistered(tokenId,maxSupply,artistAddress)
             Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
-           
         }
         init(){
         }
@@ -117,9 +116,7 @@ pub contract Controller {
         } else {
         // new supply value after adding amount
             let newSupply = supply + amount
-
             var _reserve = Controller.allSocialTokens[tokenId]!.reserve
-     
             return (((_reserve * newSupply * newSupply) / (supply * supply)) - _reserve)
         }
     }  
@@ -147,9 +144,6 @@ pub contract Controller {
         self.allSocialTokens = {}
         self.allArtist = {}
         self.AdminResourceStoragePath = /storage/ControllerAdmin
-
         self.account.save<@Admin>(<- create Admin(), to : self.AdminResourceStoragePath)
-    
     }
-
 }

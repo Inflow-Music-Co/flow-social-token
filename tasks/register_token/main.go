@@ -13,10 +13,10 @@ func main() {
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	//FUSD//
+	//Register New Token//
 
-	//Setup FUSD Vaults for all accounts
-	flow.TransactionFromFile("controller/registerToken").SignProposeAndPayAs("account").UFix64Argument("100.00").AccountArgument("account").RunPrintEventsFull()
+	//Register Token for a new account
+	flow.TransactionFromFile("controller/registerToken").SignProposeAndPayAs("account").UFix64Argument("100.00").AccountArgument("first").StringArgument("TestSymbol").RunPrintEventsFull()
 
 	//AdminBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("account").RunFailOnError()
 	//log.Printf(" ------ Admin Account Balance got all remaining percentage ----- %s", AdminBalance)

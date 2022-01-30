@@ -4,7 +4,7 @@ import Controller from "../../contracts/Controller.cdc"
 import SocialToken from "../../contracts/SocialToken.cdc"
 
 
-transaction (maxSupply: UFix64, artistAddress: Address){
+transaction (maxSupply: UFix64, artistAddress: Address, symbol: String){
     prepare(acct: AuthAccount) {
         let adminResource = acct.borrow<&Controller.Admin>(from:Controller.AdminResourceStoragePath)
             ??panic("could not borrow a reference to the admin")
@@ -13,9 +13,10 @@ transaction (maxSupply: UFix64, artistAddress: Address){
             acct.address: Controller.FeeStructure(0.03),
             artistAddress: Controller.FeeStructure(0.15)
             }
-            let symbol = "S"
-
-        adminResource.registerToken(symbol, maxSupply, feeSplitterDetail,artistAddress)
+        
+        let tokenStoragePath = /storage/TestSymbol_0x05
+        let tokenPublicPath = /public/TestSymbol_0x05
+        adminResource.registerToken(symbol, maxSupply, feeSplitterDetail, artistAddress, tokenStoragePath:tokenStoragePath,tokenPublicPath:tokenPublicPath)
         log("token registered")
     }  
 }
