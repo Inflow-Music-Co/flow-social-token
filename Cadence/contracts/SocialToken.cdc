@@ -143,7 +143,6 @@ pub contract SocialToken : FungibleToken{
                 amount + Controller.allSocialTokens[tokenId]!.issuedSupply <= Controller.allSocialTokens[tokenId]!.maxSupply: "Max supply reached"
             }
             let mintPrice = SocialToken.getMintPrice(tokenId, amount)
-
             assert(fusdPayment.balance >=mintPrice,message: "don't have suffiecent balance to mint tokens")
             let tempraryVar  <- create SocialToken.Vault(balance: amount)
             tempraryVar.setTokenId(tokenId)
