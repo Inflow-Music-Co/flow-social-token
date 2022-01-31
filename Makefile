@@ -40,5 +40,8 @@ register-token:
 mint-burn-instant:
 	go run ./Cadence/tasks/mint_burn_instant/main.go
 
+.PHONY: mint-burn-instant
+burn-exceed-supply:
+	go run ./Cadence/tasks/burn_exceed_supply/main.go
 
 

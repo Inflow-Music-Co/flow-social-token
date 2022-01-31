@@ -1,6 +1,7 @@
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import SocialToken from "../contracts/SocialToken.cdc"
-import FUSD from "../contracts/FUSD.cdc"
+import SocialToken from 0xf8d6e0586b0a20c7
+import FungibleToken from 0xee82856bf20e2aa6
+import FUSD from 0xf8d6e0586b0a20c7
+import Controller from 0xf8d6e0586b0a20c7
 
 
 transaction (tokenId: String, amountArtistToken: UFix64, amountUsdToken: UFix64){

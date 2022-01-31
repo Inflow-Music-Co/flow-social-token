@@ -1,22 +1,38 @@
+
+// This transaction is a template for a transaction
+// to add a Vault resource to their account
+// so that they can use the SocialToken
+
 import FungibleToken from 0xee82856bf20e2aa6
-import SocialToken from "../contracts/SocialToken.cdc"
+import SocialToken from 0xf8d6e0586b0a20c7
 
+transaction {
 
-transaction () {
+    prepare(signer: AuthAccount) {
 
-    prepare(acct: AuthAccount) {
+        // Return early if the account already stores a ExampleToken Vault
+        if signer.borrow<&SocialToken.Vault>(from: /storage/socialTokenVault) != nil {
+            return
+        }
 
-    acct.save(<- SocialToken.createEmptyVault(), to: /storage/S_0x5)
-    acct.save(<- SocialToken.createNewMinter(), to: /storage/Minter)
-    acct.save(<- SocialToken.createNewBurner(), to: /storage/RBurner)
-    acct.link<&SocialToken.Burner{SocialToken.BurnerPublic}>(/public/RBurner, target: /storage/RBurner)
-    acct.link<& SocialToken.Minter{SocialToken.MinterPublic}>(/public/Minter, target:  /storage/Minter)
-    acct.link<&SocialToken.Vault{FungibleToken.Balance,SocialToken.SocialTokenPublic, FungibleToken.Receiver}>
-    (/public/S_0x5, 
-    target: /storage/S_0x5)
-    }
+        // Create a new ExampleToken Vault and put it in storage
+        signer.save(
+            <-SocialToken.createEmptyVault(),
+            to: /storage/socialTokenVault
+        )
 
-    execute {
-    log("done")
+        // Create a public capability to the Vault that only exposes
+        // the deposit function through the Receiver interface
+        signer.link<&SocialToken.Vault{FungibleToken.Receiver}>(
+            /public/socialTokenReceiver,
+            target: /storage/socialTokenVault
+        )
+
+        // Create a public capability to the Vault that only exposes
+        // the balance field through the Balance interface
+        signer.link<&SocialToken.Vault{FungibleToken.Balance}>(
+            /public/socialTokenBalance,
+            target: /storage/socialTokenVault
+        )
     }
 }

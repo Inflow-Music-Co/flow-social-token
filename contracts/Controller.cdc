@@ -1,10 +1,11 @@
 import FungibleToken from 0xee82856bf20e2aa6
+
 pub contract Controller {
 
-    pub var allSocialTokens : {String: TokenStructure}
-    pub var allArtist : {Address: Artist}
+    pub var allSocialTokens : {String:TokenStructure}
+    pub var allArtist : {Address:Artist}
 
-    pub event TokenRegistered(_ tokenId: String, _ maxSupply: UFix64, _ artist: Address)
+    pub event TokenRegistered(_ tokenId:String, _ maxSupply: UFix64, _ artist: Address)
 
     pub var AdminResourceStoragePath: StoragePath
 
@@ -17,7 +18,7 @@ pub contract Controller {
         pub var slope: UFix64
         pub var feeSplitterDetail : {Address:FeeStructure}
         pub var mintQoute: UFix64
-        pub(set) var reserve: UFix64
+        pub var reserve: UFix64
         pub var tokenResourceStoragePath: StoragePath
         pub var tokenResourcePublicPath: PublicPath
     
@@ -91,6 +92,7 @@ pub contract Controller {
             }
             let artistAddress = artist
 
+            //let tokenId = (artistAddress.toString().concat("_")).concat(symbol)
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString())            
             assert(Controller.allSocialTokens[tokenId]==nil, message: "token already registered")
             Controller.allSocialTokens[tokenId] = Controller.TokenStructure(tokenId, symbol, maxSupply, artistAddress, tokenStoragePath, tokenPublicPath)
@@ -99,8 +101,8 @@ pub contract Controller {
         }
         init(){
         }
-    }
 
+    }
 
     init(){
         self.allSocialTokens = {}

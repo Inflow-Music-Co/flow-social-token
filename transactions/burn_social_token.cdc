@@ -1,9 +1,9 @@
 import FungibleToken from 0xee82856bf20e2aa6
-import SocialToken from "../../contracts/SocialToken.cdc"
+import SocialToken from 0xf8d6e0586b0a20c7
+import Controller from 0xf8d6e0586b0a20c7
 
 
-
-transaction (amountArtistToken:UFix64){
+transaction (tokenId: String, amountArtistToken:UFix64){
 
     let sentVault: @FungibleToken.Vault
     let accountAddress : Address  
@@ -13,25 +13,16 @@ transaction (amountArtistToken:UFix64){
 
         // Get a reference to the signer's stored vault
        // Get a reference to the signer's stored vault
-        let vaultRef = acct.borrow<&SocialToken.Vault>(from: /storage/S_0x5)
+        let vaultRef = acct.borrow<&SocialToken.Vault>(from: Controller.allSocialTokens[tokenId]!.tokenResourceStoragePath)
 			?? panic("Could not borrow reference to the owner's Vault!")
-
-            
-
+        log("12313221312")
         // Withdraw tokens from the signer's stored vault
         self.sentVault <- vaultRef.withdraw(amount: amountArtistToken)
-
-
-        let publicVault = getAccount(self.accountAddress).getCapability(/public/S_0x5)
-                            .borrow<&SocialToken.Vault{SocialToken.SocialTokenPublic}>()
-                            ??panic("could not get account capability")
-            log(publicVault.getTokenId())
-    
     }
 
     execute {
         let burner =  getAccount(self.accountAddress)
-            .getCapability(/public/RBurner)
+            .getCapability(/public/SBurner)
             .borrow<&{SocialToken.BurnerPublic}>()
 			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
         let burnedTokens <-  burner.burnTokens(from: <- self.sentVault)
@@ -47,5 +38,4 @@ transaction (amountArtistToken:UFix64){
 
     }
 }
-
  
