@@ -1,5 +1,7 @@
+import FungibleToken from 0xee82856bf20e2aa6
 import SocialToken from "../../contracts/SocialToken.cdc"
-import FungibleToken from "../../contracts/FungibleToken.cdc"
+
+
 
 transaction (amountArtistToken:UFix64){
 
@@ -46,3 +48,4 @@ transaction (amountArtistToken:UFix64){
     }
 }
 
+ 

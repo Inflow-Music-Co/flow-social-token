@@ -1,6 +1,7 @@
-import SocialToken from "../../contracts/SocialToken.cdc"
-import FungibleToken from "../../contracts/FungibleToken.cdc"
-import FUSD from "../../contracts/FUSD.cdc"
+import FungibleToken from "../contracts/FungibleToken.cdc"
+import SocialToken from "../contracts/SocialToken.cdc"
+import FUSD from "../contracts/FUSD.cdc"
+
 
 transaction (amountArtistToken: UFix64, amountUsdToken: UFix64){
 
@@ -23,17 +24,17 @@ transaction (amountArtistToken: UFix64, amountUsdToken: UFix64){
 
     execute {
         let minter =  getAccount(self.trxAddress)
-            .getCapability(/public/Minter)
+            .getCapability(/public/SMinter)
             .borrow<&{SocialToken.MinterPublic}>()
-			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
-        let x <-  minter.mintTokens("TestSymbol_0x1cf0e2f2f715450",amountArtistToken,fusdPayment:<- self.sentVault)
+			?? panic("Could not borrow receiver reference to the S recipient's Vault")
+        let burnedTokens <-  minter.mintTokens("S_0x45a1763c93006ca",amountArtistToken,fusdPayment:<- self.sentVault)
 
 
         let receiverRef =  getAccount(self.trxAddress)
             .getCapability(/public/S_0x5)
             .borrow<&SocialToken.Vault{FungibleToken.Receiver}>()
-			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
-        receiverRef.deposit(from: <-x)
+			?? panic("Could not borrow receiver reference to the S recipient's Vault 2")
+        receiverRef.deposit(from: <-burnedTokens)
 
         log("successfuly deposit the amount in the receiver address")
 

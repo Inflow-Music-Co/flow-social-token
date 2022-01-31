@@ -1,16 +1,16 @@
-import FungibleToken from "../../contracts/FungibleToken.cdc"
-import FUSD from "../../contracts/FUSD.cdc"
-import Controller from "../../contracts/Controller.cdc"
-import SocialToken from "../../contracts/SocialToken.cdc"
+import FungibleToken from "../contracts/FungibleToken.cdc"
+import SocialToken from "../contracts/SocialToken.cdc"
+import Controller from "../contracts/Controller.cdc"
+import FUSD from "../contracts/FUSD.cdc"
 
 
-transaction (maxSupply: UFix64, artistAddress: Address, symbol: String){
+transaction (symbol: String, maxSupply: UFix64, artistAddress: Address){
     prepare(acct: AuthAccount) {
         let adminResource = acct.borrow<&Controller.Admin>(from:Controller.AdminResourceStoragePath)
             ??panic("could not borrow a reference to the admin")
 
             let feeSplitterDetail: {Address:Controller.FeeStructure} = {
-            acct.address: Controller.FeeStructure(0.03),
+            acct.address: Controller.FeeStructure(0.05),
             artistAddress: Controller.FeeStructure(0.15)
             }
         

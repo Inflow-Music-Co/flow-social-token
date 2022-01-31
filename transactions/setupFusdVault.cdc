@@ -4,9 +4,9 @@
 //
 // - FungibleToken.Receiver: this capability allows this account to accept FUSD deposits.
 // - FungibleToken.Balance: this capability allows anybody to inspect the FUSD balance of this account.
+import FungibleToken from 0xee82856bf20e2aa6
+import FUSD from "./../contracts/FUSD.cdc"
 
-import FungibleToken from "../../contracts/FungibleToken.cdc"
-import FUSD from "../../contracts/FUSD.cdc"
 
 transaction {
 

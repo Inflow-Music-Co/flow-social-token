@@ -101,43 +101,7 @@ pub contract Controller {
         }
         init(){
         }
-
     }
-    pub fun getMintPrice(_ tokenId: String, _ amount: UFix64): UFix64{
-        pre { 
-            amount > 0.0: "Amount must be greator than zero"
-            tokenId != "" : "token id must not be null"
-            Controller.allSocialTokens[tokenId] !=nil: "token not registered"
-        }
-
-        let supply =  Controller.allSocialTokens[tokenId]!.issuedSupply
-        if supply == 0.0 {
-            return ( Controller.allSocialTokens[tokenId]!.slope * amount) 
-        } else {
-        // new supply value after adding amount
-            let newSupply = supply + amount
-            var _reserve = Controller.allSocialTokens[tokenId]!.reserve
-            return (((_reserve * newSupply * newSupply) / (supply * supply)) - _reserve)
-        }
-    }  
-
-    pub fun getBurnPrice(_ tokenId: String, _ amount: UFix64): UFix64{
-        pre { 
-            amount > 0.0: "Amount must be greator than zero"
-            tokenId != "" : "token id must not be null"
-            Controller.allSocialTokens[tokenId] !=nil: "token not registered"
-        }
-
-        let supply = Controller.allSocialTokens[tokenId]!.issuedSupply
-        assert((supply > 0.0), message: "Token supply is zero")    
-        assert((supply>=amount), message: "amount greater than supply")
-        let newSupply = supply - amount
-        var _reserve = Controller.allSocialTokens[tokenId]!.reserve;
-        return (_reserve - ((_reserve * newSupply * newSupply) / (supply * supply)))
-        
-    }
-    
-
 
 
     init(){
