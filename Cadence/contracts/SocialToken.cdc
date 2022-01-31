@@ -9,6 +9,10 @@ pub contract SocialToken : FungibleToken{
     pub event TokensInitialized(initialSupply: UFix64)
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
     pub event TokensDeposited(amount: UFix64, to: Address?)
+    pub event TokenIdSeted(_ tokenId: String)
+    pub event FeeDistributed(_ tokenId: String, _ fusdPayment: @FungibleToken.Vault)
+    pub event TokensMinted(_ tokenId: String, _ amount: UFix64, _ fusdPayment: @FungibleToken.Vault)
+    pub event TokensBurned(_ amount: UFix64, _ from: @FungibleToken.Vault)
 
     pub var collateralPool: FUSDPool
     pub resource interface SocialTokenPublic{
@@ -31,6 +35,7 @@ pub contract SocialToken : FungibleToken{
                 tokenId !=nil: "token id must not be nil"
             }
             self.tokenId = tokenId
+            emit TokenIdSeted(tokenId)
         }
         pub fun getTokenId(): String{
             return self.tokenId
@@ -90,7 +95,6 @@ pub contract SocialToken : FungibleToken{
     access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault{
             let amount = fusdPayment.balance
             for  address in   Controller.allSocialTokens[tokenId]!.feeSplitterDetail.keys {
-                log(address)
                 let feeStructer = Controller.allSocialTokens[tokenId]!.feeSplitterDetail[address]
 
                 let tempAmmount = amount * feeStructer!.percentage
@@ -101,7 +105,7 @@ pub contract SocialToken : FungibleToken{
                 let depositSigner= account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
                 .borrow()
                 ??panic("could not borrow")
-                
+                emit FeeDistributed(tokenId, fusdPayment)
                 depositSigner.deposit(from:<- tempraryVault)
                 }
                 return <- fusdPayment
@@ -155,6 +159,7 @@ pub contract SocialToken : FungibleToken{
             SocialToken.totalSupply = SocialToken.totalSupply + amount
             Controller.allSocialTokens[tokenId]!.reserve == remainingAmount.balance  
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
+            emit  TokensMinted(tokenId, amount, fusdPayment)
             return <- tempraryVar
         }
 
@@ -170,6 +175,7 @@ pub contract SocialToken : FungibleToken{
             let burnPrice = SocialToken.getBurnPrice(tokenId, amount)
             Controller.allSocialTokens[tokenId]!.reserve ==  Controller.allSocialTokens[tokenId]!.reserve - burnPrice
             SocialToken.totalSupply = SocialToken.totalSupply - amount
+            emit TokensBurned(amount, from)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }
