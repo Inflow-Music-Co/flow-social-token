@@ -1,5 +1,4 @@
 import FungibleToken from 0xee82856bf20e2aa6
-
 pub contract Controller {
 
     pub var allSocialTokens : {String: TokenStructure}
@@ -36,13 +35,13 @@ pub contract Controller {
             self.tokenResourcePublicPath = tokenPublicPath
         }
 
-        access(account) fun incrementIssuedSupply(_ amount: UFix64){
+        pub fun incrementIssuedSupply(_ amount: UFix64){
             pre{
                 self.issuedSupply + amount <= self.maxSupply : "max supply reached"
             }
             self.issuedSupply = self.issuedSupply + amount
         }
-        access(account) fun setFeeSpliterDetail(_ feeSplitterDetail:{Address: FeeStructure}){
+        pub fun setFeeSpliterDetail(_ feeSplitterDetail:{Address: FeeStructure}){
             pre {
             }
             self.feeSplitterDetail = feeSplitterDetail
@@ -57,7 +56,7 @@ pub contract Controller {
             self.address = address
             self.tokenIds = []
         }
-        access(account) fun addToken(_ tokenId: String){
+        pub fun addToken(_ tokenId: String){
             pre {
                 self.tokenIds.contains(tokenId)==false:"Token already added"
             }
