@@ -1,89 +1,83 @@
 {
-  "emulators": {
-    "default": {
-      "port": 3569,
-      "serviceAccount": "emulator-account"
-    }
-  },
-  "contracts": {
-    "Debug": "./Cadence/contracts/Debug.cdc",
-    "FungibleToken": {
-      "source": "./Cadence/contracts/FungibleToken.cdc",
-      "aliases": {
-        "emulator": "0xee82856bf20e2aa6"
-      }
-    },
-    "FUSD": {
-      "source": "./Cadence/contracts/FUSD.cdc",
-      "aliases": {
-        "emulator": "0x179b6b1cb6755e31"
-      }
-    },
+
+	"emulators": {
+		"default": {
+			"port": 3569,
+			"serviceAccount": "emulator-account"
+		}
+	},
+	"contracts": {
+		"Debug": "./Cadence/contracts/Debug.cdc",
+		"SocialToken": {
+			"source": "./Cadence/contracts/SocialToken.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79",
+				"testnet": "0x7e60df042a9c0868"
+			}
+		},
+		"FungibleToken": {
+			"source": "./Cadence/contracts/FungibleToken.cdc",
+			"aliases": {
+				"emulator": "0xee82856bf20e2aa6",
+				"testnet": "0x9a0766d93b6608b7"
+			}
+		},
+		"FUSD": {
+			"source": "./Cadence/contracts/FUSD.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79",
+				"testnet": "0x7e60df042a9c0868"
+			}
+		},
     "Controller": {
-      "source": "./Cadence/contracts/Controller.cdc",
-      "aliases": {
-        "emulator": "0xf3fcd2c1a78f5eee"
-      }
-    },
-    "SocialToken": {
-      "source": "./Cadence/contracts/SocialToken.cdc",
-      "aliases": {
-        "emulator": "0xe03daebed8ca0615"
-      }
-    }
-  },
-  "networks": {
-    "emulator": "127.0.0.1:3569",
-    "mainnet": "access.mainnet.nodes.onflow.org:9000",
-    "testnet": "access.devnet.nodes.onflow.org:9000"
-  },
-  "accounts": {
-    "emulator-account": {
-      "address": "f8d6e0586b0a20c7",
-      "key": "dc0097a6b58533e56af78c955e7b0c0f386b5f44f22b75c390beab7fcb1af13f"
-    },
-    "emulator-first": {
-      "address": "0x01cf0e2f2f715450",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "emulator-second": {
-      "address": "0x179b6b1cb6755e31",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "emulator-third": {
-      "address": "0xf3fcd2c1a78f5eee",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "0x04": {
-      "address": "0xe03daebed8ca0615",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "0x05": {
-      "address": "0x045a1763c93006ca",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "0x06": {
-      "address": "0x120e725050340cab",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "0x07": {
-      "address": "0xf669cb8d41ce0c74",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    },
-    "0x08": {
-      "address": "0x192440c99cb17282",
-      "key": "fd4dbe7da1b2c53c3b81785dbb1911e4fb04815e2154713e04ea6eb47a97c651"
-    }
-  },
-  "deployments": {
-    "emulator": {
-      "emulator-account": [
+			"source": "./Cadence/contracts/Controller.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79",
+				"testnet": "0x7e60df042a9c0868"
+			}
+		}
+	},
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "dc0097a6b58533e56af78c955e7b0c0f386b5f44f22b75c390beab7fcb1af13f"
+		},
+		"emulator-first": {
+			"address": "01cf0e2f2f715450",
+			"key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
+		},
+		"emulator-second": {
+			"address": "179b6b1cb6755e31",
+			"key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
+		},
+		"emulator-3": {
+			"address": "f3fcd2c1a78f5eee",
+			"key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
+		},
+		"emulator-4": {
+			"address": "e03daebed8ca0615",
+			"key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
+		},
+		"emulator-5": {
+			"address": "045a1763c93006ca",
+			"key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
+		}
+	},
+	"deployments": {
+		"emulator": {
+			"emulator-account": [
 				"FungibleToken",
 				"FUSD",
         "Controller",
 				"SocialToken"
-
-			]
-    }
-  }
+			],
+			"emulator-first": [],
+			"emulator-second": []
+		}
+	}
 }

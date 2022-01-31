@@ -9,6 +9,7 @@ pub contract SocialToken : FungibleToken{
     pub event TokensInitialized(initialSupply: UFix64)
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
     pub event TokensDeposited(amount: UFix64, to: Address?)
+    pub event TokenIdSeted(_ tokenId: String)
 
     pub var collateralPool: FUSDPool
     pub resource interface SocialTokenPublic{
@@ -31,6 +32,7 @@ pub contract SocialToken : FungibleToken{
                 tokenId !=nil: "token id must not be nil"
             }
             self.tokenId = tokenId
+            emit TokenIdSeted(tokenId)
         }
         pub fun getTokenId(): String{
             return self.tokenId
@@ -90,7 +92,6 @@ pub contract SocialToken : FungibleToken{
     access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault{
             let amount = fusdPayment.balance
             for  address in   Controller.allSocialTokens[tokenId]!.feeSplitterDetail.keys {
-                log(address)
                 let feeStructer = Controller.allSocialTokens[tokenId]!.feeSplitterDetail[address]
 
                 let tempAmmount = amount * feeStructer!.percentage
@@ -101,7 +102,7 @@ pub contract SocialToken : FungibleToken{
                 let depositSigner= account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
                 .borrow()
                 ??panic("could not borrow")
-                
+              
                 depositSigner.deposit(from:<- tempraryVault)
                 }
                 return <- fusdPayment

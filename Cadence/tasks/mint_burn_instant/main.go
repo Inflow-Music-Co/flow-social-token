@@ -19,19 +19,22 @@ func main() {
 
 	//Setup FUSD Vaults for all accounts
 	log.Printf(" ------")
-	flow.TransactionFromFile("setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("second").RunPrintEventsFull() // Artist Vault
+	flow.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("first").RunPrintEventsFull()
 	log.Printf(" ---")
 
+	flow.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("account").RunPrintEventsFull()
+	log.Printf(" ---")
+
+	flow.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("second").RunPrintEventsFull() // Artist Vault
+
 	//First Account sets up FUSD Minter
-	flow.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits minter into first account
-	flow.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setMinterProxy").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	// First Account Mints and deposits in one transaction
-	flow.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
 	//Log balance
 	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
@@ -42,18 +45,18 @@ func main() {
 	//-------------------------------------------------//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("controller/registerToken").SignProposeAndPayAs("account").UFix64Argument("10000000.00").AccountArgument("first").StringArgument("TestSymbol").RunPrintEventsFull()
+	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
 	//-------------------------------------------------//
 	//--------- SETUP AND MINT SOCIAL TOKEN -----------//
 	//-------------------------------------------------//
 
 	//Setup SocialToken Vaults for both accounts
-	flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
 	//flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
 
 	//First Account sets up Social Minter
-	flow.TransactionFromFile("social_token/setup_social_minter").StringArgument("TestSymbol_0x1cf0e2f2f715450").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_social_minter").StringArgument("TestSymbol_0x1cf0e2f2f715450").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits minter into first account
 	//	flow.TransactionFromFile("social_token/deposit_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
@@ -61,7 +64,7 @@ func main() {
 	log.Printf(" ------ Social Token Details ----- %s", mintQuote)
 
 	// mint social Tokens
-	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("10000000.00").UFix64Argument("10000000.00").RunPrintEventsFull()
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("first").UFix64Argument("10000000.00").UFix64Argument("10000000.00").RunPrintEventsFull()
 
 	//Log balance
 	fusdFirstAccountBalance = flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()

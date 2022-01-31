@@ -2,10 +2,10 @@ import FungibleToken from 0xee82856bf20e2aa6
 
 pub contract Controller {
 
-    pub var allSocialTokens : {String:TokenStructure}
-    pub var allArtist : {Address:Artist}
+    pub var allSocialTokens : {String: TokenStructure}
+    pub var allArtist : {Address: Artist}
 
-    pub event TokenRegistered(_ tokenId:String, _ maxSupply: UFix64, _ artist: Address)
+    pub event TokenRegistered(_ tokenId: String, _ maxSupply: UFix64, _ artist: Address)
 
     pub var AdminResourceStoragePath: StoragePath
 
@@ -36,13 +36,13 @@ pub contract Controller {
             self.tokenResourcePublicPath = tokenPublicPath
         }
 
-        pub fun incrementIssuedSupply(_ amount: UFix64){
+        access(account) fun incrementIssuedSupply(_ amount: UFix64){
             pre{
                 self.issuedSupply + amount <= self.maxSupply : "max supply reached"
             }
             self.issuedSupply = self.issuedSupply + amount
         }
-        pub fun setFeeSpliterDetail(_ feeSplitterDetail:{Address: FeeStructure}){
+        access(account) fun setFeeSpliterDetail(_ feeSplitterDetail:{Address: FeeStructure}){
             pre {
             }
             self.feeSplitterDetail = feeSplitterDetail
@@ -57,7 +57,7 @@ pub contract Controller {
             self.address = address
             self.tokenIds = []
         }
-        pub fun addToken(_ tokenId: String){
+        access(account) fun addToken(_ tokenId: String){
             pre {
                 self.tokenIds.contains(tokenId)==false:"Token already added"
             }
@@ -92,7 +92,6 @@ pub contract Controller {
             }
             let artistAddress = artist
 
-            //let tokenId = (artistAddress.toString().concat("_")).concat(symbol)
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString())            
             assert(Controller.allSocialTokens[tokenId]==nil, message: "token already registered")
             Controller.allSocialTokens[tokenId] = Controller.TokenStructure(tokenId, symbol, maxSupply, artistAddress, tokenStoragePath, tokenPublicPath)

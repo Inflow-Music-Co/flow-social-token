@@ -1,8 +1,7 @@
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import SocialToken from "../contracts/SocialToken.cdc"
-import Controller from "../contracts/Controller.cdc"
-import FUSD from "../contracts/FUSD.cdc"
-
+import FUSD from 0xf8d6e0586b0a20c7
+import SocialToken from 0xf8d6e0586b0a20c7
+import FungibleToken from 0xee82856bf20e2aa6
+import Controller from 0xf8d6e0586b0a20c7
 
 transaction (symbol: String, maxSupply: UFix64, artistAddress: Address){
     prepare(acct: AuthAccount) {

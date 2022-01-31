@@ -5,7 +5,7 @@
 // must run deposit_fusd_minter.cdc to deposit a minter resource
 // inside the minter proxy.
 
-import FUSD from "../contracts/FUSD.cdc"
+import FUSD from 0xf8d6e0586b0a20c7
 
 
 transaction {
