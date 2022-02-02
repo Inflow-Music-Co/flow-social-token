@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
+	
 	"log"
 
 	"github.com/bjartek/go-with-the-flow/v2/gwtf"
-	"github.com/onflow/cadence"
 )
 
 func main() {
@@ -84,7 +83,7 @@ func main() {
 	flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("10000000.00000000").RunPrintEventsFull()
 	// Get the balance of all accounts
 	ArtistAccountBalanceFUSD := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
-	log.Printf(" ------ User FUSD Balance after burning ----- %s", ArtistAccountBalance)
+	log.Printf(" ------ User FUSD Balance after burning ----- %s", ArtistAccountBalanceFUSD)
 
 	ArtistAccountBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf(" ------ User Social Balance after burning ----- %s", ArtistAccountBalance)
@@ -94,10 +93,6 @@ func main() {
 	log.Printf("FUSD balance of account 'artist account' %s", fusdFirstAccountBalance)
 
 	AdminBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("account").RunFailOnError()
-	log.Printf(" ------ Admin Account Balance got all remaining percentage ----- %s", AdminBalance)
-	ArtistBalances, _ := cadence.CastToUInt16(ArtistAccountBalanceFUSD)
-	AdminBalances, _ := cadence.CastToUInt16(fusdFirstAccountBalance)
-	UserBalances, _ := cadence.CastToUInt16(AdminBalance)
+	log.Printf("Admin balance of account  %s", AdminBalance)
 
-	fmt.Println("Subtract All Balances(Should be zero)", ArtistBalances-AdminBalances-UserBalances)
 }

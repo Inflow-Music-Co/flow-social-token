@@ -18,18 +18,18 @@ func main() {
 	//FUSD//
 
 	//Setup FUSD Vaults for all accounts
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull()
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
-	flow.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("second").RunPrintEventsFull() // Artist Vault
+	flow.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("account").RunPrintEventsFull()
+	flow.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("second").RunPrintEventsFull() // Artist Vault
 
 	//First Account sets up FUSD Minter
-	flow.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits minter into first account
-	flow.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	// First Account Mints and deposits in one transaction
-	flow.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull()
 
 	//Log balance
 	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
@@ -62,10 +62,7 @@ func main() {
 	flow.TransactionFromFile("social_token/mint_social_token").SignProposeAndPayAs("first").UFix64Argument("100.00").UFix64Argument("100.00").RunPrintEventsFull()
 
 	// Get the balance of all accounts
-	ArtistAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
+	ArtistAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
 	log.Printf(" ------ Artist Account Balance got 3 percent ----- %s", ArtistAccountBalance)
-
-	AdminBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("account").RunFailOnError()
-	log.Printf(" ------ Admin Account Balance got all remaining percentage ----- %s", AdminBalance)
 
 }

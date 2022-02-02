@@ -85,7 +85,7 @@ func main() {
 	mintQuote = flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ Social Mint Quote N Before ----- %s", mintQuote)
 
-	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("N_0x1cf0e2f2f715450").UFix64Argument("10.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("N_0x179b6b1cb6755e31").UFix64Argument("10.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
 	mintQuote = flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ Social Mint Quote N After ----- %s", mintQuote)
 
@@ -94,5 +94,7 @@ func main() {
 
 	UserSocialBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ User Social Token Balance of N ----- %s", UserSocialBalance)
+	
+	flow.TransactionFromFile("transfer_tokens_same_vault").SignProposeAndPayAs("second").UFix64Argument("10.00").AccountArgument("second").RunPrintEventsFull()
 
 }

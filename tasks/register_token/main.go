@@ -16,7 +16,7 @@ func main() {
 	//Register New Token//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("controller/registerToken").SignProposeAndPayAs("account").UFix64Argument("100.00").AccountArgument("first").StringArgument("TestSymbol").RunPrintEventsFull()
+	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("S").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
 
 	//AdminBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("account").RunFailOnError()
 	//log.Printf(" ------ Admin Account Balance got all remaining percentage ----- %s", AdminBalance)

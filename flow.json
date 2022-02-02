@@ -7,30 +7,30 @@
 		}
 	},
 	"contracts": {
-		"Debug": "./Cadence/contracts/Debug.cdc",
+		"Debug": "./contracts/Debug.cdc",
 		"SocialToken": {
-			"source": "./Cadence/contracts/SocialToken.cdc",
+			"source": "./contracts/SocialToken.cdc",
 			"aliases": {
 				"emulator": "0x0ae53cb6e3f42a79",
 				"testnet": "0x7e60df042a9c0868"
 			}
 		},
 		"FungibleToken": {
-			"source": "./Cadence/contracts/FungibleToken.cdc",
+			"source": "./contracts/FungibleToken.cdc",
 			"aliases": {
 				"emulator": "0xee82856bf20e2aa6",
 				"testnet": "0x9a0766d93b6608b7"
 			}
 		},
 		"FUSD": {
-			"source": "./Cadence/contracts/FUSD.cdc",
+			"source": "./contracts/FUSD.cdc",
 			"aliases": {
 				"emulator": "0x0ae53cb6e3f42a79",
 				"testnet": "0x7e60df042a9c0868"
 			}
 		},
     "Controller": {
-			"source": "./Cadence/contracts/Controller.cdc",
+			"source": "./contracts/Controller.cdc",
 			"aliases": {
 				"emulator": "0x0ae53cb6e3f42a79",
 				"testnet": "0x7e60df042a9c0868"
