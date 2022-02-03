@@ -8,6 +8,7 @@ transaction (amountArtistToken: UFix64, amountUsdToken: UFix64){
     let sentVault: @FungibleToken.Vault
 
     let trxAddress : Address
+    let fusdReceiver: Capability<&AnyResource{FungibleToken.Receiver}>
 
     prepare(acct: AuthAccount) {
 
@@ -19,24 +20,24 @@ transaction (amountArtistToken: UFix64, amountUsdToken: UFix64){
         // Withdraw tokens from the signer's stored vault
         self.sentVault <- vaultRef.withdraw(amount: amountUsdToken)
 
-        log(self.sentVault.balance)
+        self.fusdReceiver = getAccount(acct.address)
+            .getCapability<&{FungibleToken.Receiver}>(/public/fusdReceiver)
+
     }
 
     execute {
         let minter =  getAccount(self.trxAddress)
-            .getCapability(/public/NMinter)
+            .getCapability(/public/SMinter)
             .borrow<&{SocialToken.MinterPublic}>()
-			?? panic("Could not borrow receiver reference to the N recipient's Vault")
-        let burnedTokens <-  minter.mintTokens("N_0x120e725050340cab",amountArtistToken,fusdPayment:<- self.sentVault)
+			?? panic("Could not borrow receiver reference to the S recipient's Vault")
+        let mintedTokens <-  minter.mintTokens("S_0x45a1763c93006ca",amountArtistToken,fusdPayment:<- self.sentVault, receiverVault: self.fusdReceiver)
 
 
         let receiverRef =  getAccount(self.trxAddress)
-            .getCapability(/public/N_0x6)
+            .getCapability(/public/S_0x5)
             .borrow<&SocialToken.Vault{FungibleToken.Receiver}>()
-			?? panic("Could not borrow receiver reference to the N recipient's Vault 2")
-        receiverRef.deposit(from: <-burnedTokens)
-
-    log("successfuly deposit the amount in the receiver address")
+			?? panic("Could not borrow receiver reference to the S recipient's Vault 2")
+        receiverRef.deposit(from: <-mintedTokens)
 
     }
 }

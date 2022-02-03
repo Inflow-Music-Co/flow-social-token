@@ -23,6 +23,5 @@ transaction {
             FUSD.MinterProxyPublicPath,
             target: FUSD.MinterProxyStoragePath
         )
-        log("done")
     }
 }
