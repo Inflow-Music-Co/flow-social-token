@@ -2,6 +2,20 @@ import FungibleToken from 0xee82856bf20e2aa6
 pub contract Controller {
 
     access(contract) var allSocialTokens :{String:TokenStructure}
+
+    //events
+    //event for incrementReserve
+    pub event incrementReserve(_ newReserve:UFix64)
+    //event for decrementReserve
+    pub event decrementReserve(_ newReserve:UFix64)
+    //event for incrementIssuedSupply
+    pub event incrementIssuedSupply(_ amount: UFix64)
+    //event for decrementIssuedSupply
+    pub event decrementIssuedSupply(_ amount: UFix64)
+    //event for register_token
+    pub event register_token(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address)
+    //event for updatePercentage
+    pub event updatePercentage(_ percentage: UFix64)
     
     pub let AdminStoragePath: StoragePath
     pub var SocialTokenResourceStoragePath: StoragePath
@@ -51,6 +65,7 @@ pub contract Controller {
                 newReserve > 0.0 : "reserve must be greater than zero"
             }
             self.reserve = self.reserve + newReserve
+            emit incrementReserve(newReserve)
         }
 
         pub fun decrementReserve(_ newReserve:UFix64){
@@ -59,6 +74,7 @@ pub contract Controller {
                 newReserve > 0.0 : "reserve must be greater than zero"
             }
             self.reserve = self.reserve - newReserve
+            emit decrementReserve(newReserve)
         }
 
         pub fun incrementIssuedSupply(_ amount: UFix64){
@@ -66,6 +82,7 @@ pub contract Controller {
                 self.issuedSupply + amount <= self.maxSupply : "max supply reached"
             }
             self.issuedSupply = self.issuedSupply + amount
+            emit incrementIssuedSupply(amount)
         }
 
         pub fun decrementIssuedSupply(_ amount: UFix64){
@@ -73,6 +90,7 @@ pub contract Controller {
                 self.issuedSupply - amount >= 0.0 : "issued supply must not be zero"
             }
             self.issuedSupply = self.issuedSupply - amount
+            emit decrementIssuedSupply(amount)
         
         }
         
@@ -84,7 +102,7 @@ pub contract Controller {
     }
 
     pub resource interface SpecialCapability {
-        pub fun register_token_test( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
@@ -102,7 +120,7 @@ pub contract Controller {
     }
 
     pub resource Admin: SpecialCapability {
-        pub fun register_token_test( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){
@@ -120,6 +138,7 @@ pub contract Controller {
                 socialMinterStoragePath, socialMinterPublicPath,
                 socialBurnerStoragePath, socialBurnerPublicPath)
             Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
+            emit register_token(tokenId, symbol, maxSupply, artistAddress)
         } 
     }
 
@@ -175,7 +194,6 @@ pub contract Controller {
         
         }
     }
-
     pub struct FeeStructure{
         pub var percentage: UFix64
 
@@ -187,6 +205,7 @@ pub contract Controller {
                 percentage >0.0: "Percentage should be greater than zero"
             }
             self.percentage = percentage
+            emit updatePercentage(percentage)
         }
     }
     pub fun getTokenDetails(_ tokenId:String):Controller.TokenStructure{

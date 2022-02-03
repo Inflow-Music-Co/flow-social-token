@@ -1,20 +1,20 @@
 import path from "path"
 import { init, emulator, getAccountAddress, deployContractByName, getContractCode, getContractAddress, getTransactionCode, getScriptCode, executeScript, sendTransaction } from "flow-js-testing";
 
-jest.setTimeout(100000);
+jest.setTimeout(100000)
 
 beforeAll(async () => {
-  const basePath = path.resolve(__dirname, "../../");
-  const port = 8080;
+  const basePath = path.resolve(__dirname, "../../")
+  const port = 8080
 
-  await init(basePath, { port });
-  await emulator.start(port);
-});
+  await init(basePath, { port })
+  await emulator.start(port)
+})
 
 afterAll(async () => {
-  const port = 8080;
-  await emulator.stop(port);
-});
+  const port = 8080
+  await emulator.stop(port)
+})
 
 
 describe("Replicate Playground Accounts", () => {
@@ -167,7 +167,7 @@ describe("Transactions", () => {
     }
   })
   test("test transaction register token", async () => {
-    const name = "register_token_test";
+    const name = "register_token";
 
     // Import participating accounts
     const Charlie = await getAccountAddress("Charlie");
