@@ -23,10 +23,6 @@ mint-with-collateral:
 .PHONY: mint-with-collateral-splitter
 mint-with-fee-distribution:
 	go run ./tasks/mint_with_fee_distribution/main.go
-	
-.PHONY: burn-with-collateral
-burn-with-collateral:
-	go run ./tasks/burn_with_collateral/main.go
 
 .PHONY: get-social-details
 get-social-details:
@@ -51,3 +47,7 @@ transfer-token-same-vaults:
 .PHONY: mint-burn-100-tokens
 mint-burn-100-tokens:
 	go run ./tasks/mint_burn_100_tokens/main.go
+
+.PHONY: get_mint_quote_loop
+get-mint-quote-loop:
+	go run ./tasks/get_mint_quote_loop/main.go
