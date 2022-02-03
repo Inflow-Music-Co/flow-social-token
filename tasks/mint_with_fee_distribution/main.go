@@ -1,6 +1,7 @@
 package main
 
 import (
+	
 	"log"
 
 	"github.com/bjartek/go-with-the-flow/v2/gwtf"
@@ -36,36 +37,69 @@ func main() {
 	// First Account Mints and deposits in one transaction
 	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("10000000.00").AccountArgument("second").RunPrintEventsFull()
 
-
-
+	//Log balance
+	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
+	log.Printf("FUSD balance of account 'first account' %s", fusdFirstAccountBalance)
+	
 	//-------------------------------------------------//
 	//--------- Register Account -----------//
 	//-------------------------------------------------//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("S").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
-	//-------------------------------------------------//
-	//--------- SETUP AND MINT SOCIAL TOKEN -----------//
-	//-------------------------------------------------//
+	
+	//--------------------------------------------------//
+	//-- SETUP Admin and Add Capability of Controller --//
+	//--------------------------------------------------//
+	flow.TransactionFromFile("setup_admin_account").SignProposeAndPayAs("account").RunPrintEventsFull()
+	
+	flow.TransactionFromFile("add_admin_account").SignProposeAndPayAs("account").AccountArgument("account").RunPrintEventsFull()
+
+	//--------------------------------------------------//
+	//--------- SETUP AND MINT SOCIAL TOKEN ------------//
+	//--------------------------------------------------//
 
 	//Setup SocialToken Vaults for both accounts
-	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("second").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunPrintEventsFull()
 	//flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
 
+
+
+	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	
+	// mint social Tokens
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("10000000.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
+
+	log.Printf(" ------ Social Mint Quote ----- %s", mintQuote)
 	//Admin Account deposits minter into first account
 	//	flow.TransactionFromFile("social_token/deposit_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
+	TokenDetails := flow.ScriptFromFile("getTokenDetails").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ Social Token Details ----- %s", TokenDetails)
+	
+	// Get the balance of all accounts
+	ArtistAccountBalance := flow.ScriptFromFile("get_issued_supply").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ get Issued Supply ----- %s", ArtistAccountBalance)
 
-	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
+	BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument("10000000.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ User Burn Price ----- %s", BurnPrice)
+
+	UserSocialBalance := flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ User Social Token Balance ----- %s", UserSocialBalance)
+	// burn social Tokens
+	flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("10000000.00000000").RunPrintEventsFull()
+	// Get the balance of all accounts
+	ArtistAccountBalanceFUSD := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
+	log.Printf(" ------ User FUSD Balance after burning ----- %s", ArtistAccountBalanceFUSD)
+
+	ArtistAccountBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ User Social Balance after burning ----- %s", ArtistAccountBalance)
+
 	//Log balance
-	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
+	fusdFirstAccountBalance = flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
+	log.Printf("FUSD balance of account 'artist account' %s", fusdFirstAccountBalance)
 
-	log.Printf("FUSD balance of user account' %s", fusdFirstAccountBalance)
-	// mint social Tokens
-	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("S_0x1cf0e2f2f715450").UFix64Argument("100.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
-
-
-	UserSocialBalance := flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
-	log.Printf(" ------ User Social Token Balance of S ----- %s", UserSocialBalance)
+	AdminBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("account").RunFailOnError()
+	log.Printf("Admin balance of account  %s", AdminBalance)
 
 }

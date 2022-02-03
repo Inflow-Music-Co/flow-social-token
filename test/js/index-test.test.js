@@ -482,7 +482,7 @@ describe("Scripts", () => {
     }
   })
   test("test script for getting the social vault balance of user", async () => {
-    const name = "get_social_balance_7"
+    const name = "get_social_balance"
 
     const FungibleToken = "0xee82856bf20e2aa6"
     const SocialToken = await getContractAddress("SocialToken")

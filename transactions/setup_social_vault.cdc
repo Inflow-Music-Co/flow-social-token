@@ -6,16 +6,16 @@ transaction (tokenId: String) {
 
     prepare(acct: AuthAccount) {
 
-    let tokenDetails = Controller.getTokenDetails(tokenId)
+        let tokenDetails = Controller.getTokenDetails(tokenId)
 
-    acct.save(<- SocialToken.createEmptyVault(), to: tokenDetails.tokenResourceStoragePath)
-    acct.save(<- SocialToken.createNewMinter(), to: tokenDetails.socialMinterStoragePath)
-    acct.save(<- SocialToken.createNewBurner(), to: tokenDetails.socialBurnerStoragePath)
-    acct.link<&SocialToken.Burner{SocialToken.BurnerPublic}>(tokenDetails.socialBurnerPublicPath, target: tokenDetails.socialBurnerStoragePath)
-    acct.link<&SocialToken.Minter{SocialToken.MinterPublic}>(tokenDetails.socialMinterPublicPath, target:  tokenDetails.socialMinterStoragePath)
-    acct.link<&SocialToken.Vault{FungibleToken.Balance, SocialToken.SocialTokenPublic, FungibleToken.Receiver}>
-    (tokenDetails.tokenResourcePublicPath, 
-    target: tokenDetails.tokenResourceStoragePath)
+        acct.save(<- SocialToken.createEmptyVault(), to: tokenDetails.tokenResourceStoragePath)
+        acct.save(<- SocialToken.createNewMinter(), to: tokenDetails.socialMinterStoragePath)
+        acct.save(<- SocialToken.createNewBurner(), to: tokenDetails.socialBurnerStoragePath)
+        acct.link<&SocialToken.Burner{SocialToken.BurnerPublic}>(tokenDetails.socialBurnerPublicPath, target: tokenDetails.socialBurnerStoragePath)
+        acct.link<&SocialToken.Minter{SocialToken.MinterPublic}>(tokenDetails.socialMinterPublicPath, target:  tokenDetails.socialMinterStoragePath)
+        acct.link<&SocialToken.Vault{FungibleToken.Balance, SocialToken.SocialTokenPublic, FungibleToken.Receiver}>
+        (tokenDetails.tokenResourcePublicPath, 
+        target: tokenDetails.tokenResourceStoragePath)
     }
     execute {
     }

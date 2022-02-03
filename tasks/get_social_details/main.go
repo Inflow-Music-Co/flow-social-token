@@ -16,7 +16,10 @@ func main() {
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	result := flow.ScriptFromFile("get_social_details").RunFailOnError()
-	log.Printf("Script returned %s", result)
+	//Register Token for a new account
+	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
+
+	result := flow.ScriptFromFile("get_social_details").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf("Script returned Social Details %s", result)
 
 }

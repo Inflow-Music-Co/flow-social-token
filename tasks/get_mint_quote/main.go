@@ -14,8 +14,10 @@ func main() {
 	// - when referencing accounts in the "storyline" below note that the default option is to prepened the network to the account name, This is done so that it is easy to run a storyline against emulator, tesnet and mainnet. This can be disabled with the `DoNotPrependNetworkToAccountNames` method on the g object below.
 
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
+	// Register Token for a new account
+	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
-	result := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("2.0").RunFailOnError()
-	log.Printf("Script returned %s", result)
+	result := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("2.0").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf("Script returned Social Mint quote %s", result)
 
 }
