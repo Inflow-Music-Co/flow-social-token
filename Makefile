@@ -36,4 +36,14 @@ get-social-details:
 register-token:
 	go run ./tasks/register_token/main.go
 
+.PHONY: mint-burn-instant
+mint-burn-instant:
+	go run ./tasks/mint_burn_instant/main.go
 
+.PHONY: transfer-token-different-vaults
+transfer-token-different-vaults-negative:
+	go run ./tasks/transfer_token_different_vaults_negative/main.go
+
+.PHONY: transfer-token-same-vaults
+transfer-token-same-vaults:
+	go run ./tasks/transfer_token_same_vaults/main.go

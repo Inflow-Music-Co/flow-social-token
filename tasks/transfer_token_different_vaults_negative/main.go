@@ -36,7 +36,9 @@ func main() {
 	// First Account Mints and deposits in one transaction
 	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("10000000.00").AccountArgument("second").RunPrintEventsFull()
 
-
+	//Log balance
+	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
+	log.Printf("FUSD balance of account 'first account' %s", fusdFirstAccountBalance)
 
 	//-------------------------------------------------//
 	//--------- Register Account -----------//
@@ -60,15 +62,40 @@ func main() {
 	//	flow.TransactionFromFile("social_token/deposit_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
-	//Log balance
-	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
 
-	log.Printf("FUSD balance of user account' %s", fusdFirstAccountBalance)
-	// mint social Tokens
-	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("S_0x1cf0e2f2f715450").UFix64Argument("100.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
-
+	for i := 0; i < 10; i++ {
+		// mint social Tokens
+		flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("S_0x1cf0e2f2f715450").UFix64Argument("10.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
+		mintQuote = flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("100.00").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
+	}
 
 	UserSocialBalance := flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf(" ------ User Social Token Balance of S ----- %s", UserSocialBalance)
+
+	log.Printf(" ------ Social Mint Quote S ----- %s", mintQuote)
+
+	//-------------------------------------------------//
+	//--------- Register Account -----------//
+	//-------------------------------------------------//
+
+	//Register Token for a new account
+	flow.TransactionFromFile("registerToken2").SignProposeAndPayAs("account").StringArgument("N").UFix64Argument("10000000.00").AccountArgument("second").RunPrintEventsFull()
+	//First Account sets up Social Minter
+	flow.TransactionFromFile("setup_social_minter2").StringArgument("N_0x179b6b1cb6755e31").SignProposeAndPayAs("second").RunPrintEventsFull()
+	mintQuote = flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
+	log.Printf(" ------ Social Mint Quote N Before ----- %s", mintQuote)
+
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("N_0x179b6b1cb6755e31").UFix64Argument("10.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
+	mintQuote = flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
+	log.Printf(" ------ Social Mint Quote N After ----- %s", mintQuote)
+
+	UserSocialBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ User Social Token Balance of S ----- %s", UserSocialBalance)
+
+	UserSocialBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
+	log.Printf(" ------ User Social Token Balance of N ----- %s", UserSocialBalance)
+
+	flow.TransactionFromFile("transfer_tokens").SignProposeAndPayAs("second").UFix64Argument("10.00").AccountArgument("second").RunPrintEventsFull()
+
 
 }

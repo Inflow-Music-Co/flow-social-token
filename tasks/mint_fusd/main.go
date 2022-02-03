@@ -12,17 +12,17 @@ func main() {
 	g := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
 	//Setup FUSD Vaults for both accounts
-	g.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull();
-	g.TransactionFromFile("fusd/setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull();
+	g.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("first").RunPrintEventsFull();
+	g.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("account").RunPrintEventsFull();
 
 	//First Account sets up FUSD Minter
-	g.TransactionFromFile("fusd/setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull();
+	g.TransactionFromFile("setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull();
 
 	//Admin Account deposits minter into first account
-	g.TransactionFromFile("fusd/deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
+	g.TransactionFromFile("deposit_fusd_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull();
 
 	// First Account Mints and deposits in one transaction
-	g.TransactionFromFile("fusd/mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull();
+	g.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull();
 
 	//Log balance
 	fusdFirstAccountBalance := g.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()

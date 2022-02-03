@@ -178,11 +178,11 @@ describe("Transactions", () => {
     const signers = [Charlie];
 
     // Generate addressMap from import statements
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const Controller = await getAccountAddress("Controller")
 
     const addressMap = {
       // FUSD,
-      FungibleToken
+      Controller,
     };
     let code = await getTransactionCode({
       name,
@@ -341,7 +341,7 @@ describe("Transactions", () => {
     // expect(txResult[0].errorMessage).toBe("");
   });
   test("test transaction setup social vault for account five", async () => {
-    const name = "setup_social_vault_5"
+    const name = "setup_social_vault"
 
     const Eve = await getAccountAddress("Eve")
 
@@ -358,11 +358,13 @@ describe("Transactions", () => {
       name,
       addressMap,
     })
+    const args = ["S_0x45a1763c93006ca"]
     let txResult
     try {
       txResult = await sendTransaction({
         code,
         signers,
+        args,
       });
     } catch (e) {
       console.log(e);
@@ -370,7 +372,7 @@ describe("Transactions", () => {
     console.log("tx Result", txResult);
   });
   test("test transaction mint social token for account five symbol S", async () => {
-    const name = "mint_social_token_S";
+    const name = "mint_social_token";
 
     // Import participating accounts
     const Eve = await getAccountAddress("Eve");
@@ -393,7 +395,7 @@ describe("Transactions", () => {
       name,
       addressMap,
     });
-    const args = [100.0, 100.0];
+    const args = ["S_0x45a1763c93006ca", 100.0, 100.0];
     let txResult;
     try {
       txResult = await sendTransaction({
@@ -431,7 +433,7 @@ describe("Transactions", () => {
       name,
       addressMap,
     });
-    const args = [100.0];
+    const args = ["S_0x45a1763c93006ca", 100.0];
     let txResult;
     try {
       txResult = await sendTransaction({
@@ -490,7 +492,7 @@ describe("Scripts", () => {
       SocialToken,
     }
     const Eve = await getAccountAddress("Eve")
-    const args = [Eve]
+    const args = [Eve, "S_0x45a1763c93006ca"]
 
     let code = await getScriptCode({
       name,

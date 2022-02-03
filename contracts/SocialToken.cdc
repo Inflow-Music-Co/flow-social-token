@@ -42,12 +42,13 @@ pub contract SocialToken : FungibleToken{
             if(self.tokenId == ""){
                 self.tokenId = vault.tokenId 
             }
-            assert(vault.tokenId == self.tokenId, message:"error") 
+            assert(vault.tokenId == self.tokenId, message:"error: invalid token id") 
             self.balance = self.balance + vault.balance   
             emit TokensDeposited(amount: vault.balance, to: self.owner?.address)  
             vault.balance = 0.0      
             destroy vault
         }
+
         pub fun withdraw(amount: UFix64): @FungibleToken.Vault {
             self.balance = self.balance - amount
             let vault <- create Vault(balance:amount)
@@ -58,7 +59,6 @@ pub contract SocialToken : FungibleToken{
         destroy () {
             SocialToken.totalSupply = SocialToken.totalSupply - self.balance
         }
-    
     }
 
     pub fun createEmptyVault(): @Vault{

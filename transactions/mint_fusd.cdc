@@ -13,8 +13,8 @@
 // an FUSD vault stored in their account. To check if an account has a vault
 // or initialize a new vault, use check_fusd_vault_setup.cdc and setup_fusd_vault.cdc
 // respectively.
-import FungibleToken from "../contracts/FungibleToken.cdc"
-import FUSD from "../contracts/FUSD.cdc"
+import FungibleToken from 0xee82856bf20e2aa6
+import FUSD from 0xf8d6e0586b0a20c7
 
 transaction(amount: UFix64, to: Address) {
 

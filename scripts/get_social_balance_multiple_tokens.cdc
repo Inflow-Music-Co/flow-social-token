@@ -1,4 +1,4 @@
-import FungibleToken from "../contracts/FungibleToken.cdc"
+import FungibleToken from 0xee82856bf20e2aa6
 import SocialToken from "../contracts/SocialToken.cdc"
 pub fun main(account: Address): {String: UFix64} {
 

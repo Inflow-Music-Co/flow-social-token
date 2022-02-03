@@ -19,8 +19,17 @@ pub contract Controller {
         pub var slope: UFix64
         pub var feeSplitterDetail : {Address:FeeStructure}
         pub var reserve: UFix64
+        pub var tokenResourceStoragePath: StoragePath
+        pub var tokenResourcePublicPath: PublicPath
+        pub var socialMinterStoragePath: StoragePath
+        pub var socialMinterPublicPath: PublicPath
+        pub var socialBurnerStoragePath: StoragePath
+        pub var socialBurnerPublicPath: PublicPath
 
-        init(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address){
+        init(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address,
+            _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
+            _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
+            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){
             self.tokenId = tokenId
             self.symbol = symbol
             self.issuedSupply = 0.0
@@ -29,6 +38,12 @@ pub contract Controller {
             self.slope = 0.5
             self.feeSplitterDetail = {}
             self.reserve = 0.0
+            self.tokenResourceStoragePath = tokenStoragePath
+            self.tokenResourcePublicPath = tokenPublicPath
+            self.socialMinterStoragePath = socialMinterStoragePath
+            self.socialMinterPublicPath = socialMinterPublicPath
+            self.socialBurnerStoragePath = socialBurnerStoragePath
+            self.socialBurnerPublicPath = socialBurnerPublicPath
         }
 
         pub fun incrementReserve(_ newReserve:UFix64){
@@ -72,7 +87,10 @@ pub contract Controller {
     }
 
     pub resource interface SpecialCapability {
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address)
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+            _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
+            _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
+            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
     }
 
     pub resource interface UserSpecialCapability {
@@ -87,7 +105,10 @@ pub contract Controller {
     }
 
     pub resource Admin: SpecialCapability {  
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address){
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+            _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
+            _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
+            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){
             pre{
                 symbol !=nil: "symbol must not be null"
                 maxSupply > 0.0: "max supply must be greater than zero"
@@ -96,7 +117,11 @@ pub contract Controller {
             let resourceOwner = self.owner!.address
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString()) 
             assert(Controller.allSocialTokens[tokenId]==nil, message:"token already registered")     
-            Controller.allSocialTokens[tokenId]= Controller.TokenStructure(tokenId, symbol,maxSupply,artistAddress)
+            Controller.allSocialTokens[tokenId]= Controller.TokenStructure(
+                tokenId, symbol, maxSupply, artistAddress,
+                tokenStoragePath, tokenPublicPath,
+                socialMinterStoragePath, socialMinterPublicPath,
+                socialBurnerStoragePath, socialBurnerPublicPath)
             Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
         } 
     }
@@ -176,6 +201,7 @@ pub contract Controller {
     pub fun createSocialTokenResource(): @SocialTokenResource{
         return <- create SocialTokenResource()    
     }
+
 
     init(){
         self.allSocialTokens= {}
