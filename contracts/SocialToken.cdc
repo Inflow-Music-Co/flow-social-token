@@ -149,6 +149,7 @@ pub contract SocialToken : FungibleToken{
                 amount > 0.0: "Amount minted must be greater than zero"
                 Controller.getTokenDetails(tokenId).tokenId !=nil: "toke not registered"
                 amount + Controller.getTokenDetails(tokenId).issuedSupply <=  Controller.getTokenDetails(tokenId).maxSupply : "Max supply reached"
+                SocialToken.adminRef.borrow() !=nil: "social token does not have controller capability"
             }
             var remainingFUSD = 0.0
             var remainingSocialToken = 0.0
@@ -168,10 +169,10 @@ pub contract SocialToken : FungibleToken{
             let tempraryVar  <- create SocialToken.Vault(balance: amount)
             tempraryVar.setTokenId(tokenId)
             let tokenDetails = Controller.getTokenDetails(tokenId)
-            SocialToken.adminRef.borrow()?.incrementIssuedSupply(tokenId, amount)
+            SocialToken.adminRef.borrow()!.incrementIssuedSupply(tokenId, amount)
             let remainingAmount <-   SocialToken.distributeFee(tokenId,  <- fusdPayment)
             SocialToken.totalSupply = SocialToken.totalSupply + amount
-            SocialToken.adminRef.borrow()?.incrementReserve(tokenId, remainingAmount.balance)
+            SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             return <- tempraryVar
             }
@@ -186,8 +187,8 @@ pub contract SocialToken : FungibleToken{
             let tokenId = vault.getTokenId()
             let burnPrice = SocialToken.getBurnPrice(tokenId, amount)
             let tokenDetails = Controller.getTokenDetails(tokenId)
-            SocialToken.adminRef.borrow()?.decrementIssuedSupply(tokenId, amount)
-            SocialToken.adminRef.borrow()?.decrementReserve(tokenId, burnPrice)
+            SocialToken.adminRef.borrow()!.decrementIssuedSupply(tokenId, amount)
+            SocialToken.adminRef.borrow()!.decrementReserve(tokenId, burnPrice)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }
