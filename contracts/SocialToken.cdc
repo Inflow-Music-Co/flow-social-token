@@ -153,7 +153,7 @@ pub contract SocialToken : FungibleToken{
             var remainingSocialToken = 0.0
             let mintPrice = SocialToken.getMintPrice(tokenId, amount)
 
-            assert(fusdPayment.balance >= mintPrice,message: "don't have suffiecent balance to mint tokens")
+            assert(fusdPayment.balance >= mintPrice, message: "You don't have sufficient balance to mint tokens")
             var totalPayment = fusdPayment.balance
             assert(totalPayment>=mintPrice, message: "No payment yet")
             let extraAmount = totalPayment-mintPrice
