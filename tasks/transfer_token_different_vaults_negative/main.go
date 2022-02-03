@@ -101,7 +101,7 @@ func main() {
 	UserSocialBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("second").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ User Social Token Balance of N ----- %s", UserSocialBalance)
 
-	flow.TransactionFromFile("transfer_tokens").SignProposeAndPayAs("second").UFix64Argument("10.00").AccountArgument("second").RunPrintEventsFull()
+	flow.TransactionFromFile("transfer_tokens").SignProposeAndPayAs("second").StringArgument("N_0x179b6b1cb6755e31").UFix64Argument("10.00").AccountArgument("second").RunPrintEventsFull()
 
 
 }

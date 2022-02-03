@@ -6,6 +6,7 @@
 // would be the parameters to the transaction
 import FungibleToken from 0xee82856bf20e2aa6
 import SocialToken from 0xf8d6e0586b0a20c7
+import Controller from 0xf8d6e0586b0a20c7
 
 transaction(tokenId: String, amount: UFix64,to:Address) {
 
@@ -13,7 +14,7 @@ transaction(tokenId: String, amount: UFix64,to:Address) {
     let sentVault: @FungibleToken.Vault
 
     prepare(signer: AuthAccount) {
-        let tokenDetails = Controller.getTokenDetails(tokenDetails)
+        let tokenDetails = Controller.getTokenDetails(tokenId)
         // Get a reference to the signer's stored vault
         let vaultRef = signer.borrow<&SocialToken.Vault>(from: tokenDetails.tokenResourceStoragePath)
 			?? panic("Could not borrow reference to the owner's Vault!")
