@@ -40,7 +40,7 @@ func main() {
 	//Log balance
 	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("first").RunFailOnError()
 	log.Printf("FUSD balance of account 'first account' %s", fusdFirstAccountBalance)
-
+	
 	//-------------------------------------------------//
 	//--------- Register Account -----------//
 	//-------------------------------------------------//
@@ -48,9 +48,17 @@ func main() {
 	//Register Token for a new account
 	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
-	//-------------------------------------------------//
-	//--------- SETUP AND MINT SOCIAL TOKEN -----------//
-	//-------------------------------------------------//
+	
+	//--------------------------------------------------//
+	//-- SETUP Admin and Add Capability of Controller --//
+	//--------------------------------------------------//
+	flow.TransactionFromFile("setup_admin_account").SignProposeAndPayAs("account").RunPrintEventsFull()
+	
+	flow.TransactionFromFile("add_admin_account").SignProposeAndPayAs("account").AccountArgument("account").RunPrintEventsFull()
+
+	//--------------------------------------------------//
+	//--------- SETUP AND MINT SOCIAL TOKEN ------------//
+	//--------------------------------------------------//
 
 	//Setup SocialToken Vaults for both accounts
 	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunPrintEventsFull()
