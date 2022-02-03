@@ -45,7 +45,7 @@ func main() {
 	//-------------------------------------------------//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("register_token_test").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
 	
 	//--------------------------------------------------//

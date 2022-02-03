@@ -16,7 +16,7 @@ transaction (symbol: String, maxSupply: UFix64, artistAddress: Address){
         let socialMinterPublicPath = /public/TestSymbol_0x5Minter
         let socialBurnerStoragePath = /storage/TestSymbol_0x5Burner
         let socialBurnerPublicPath = /public/TestSymbol_0x5Burner
-        adminResource.register_token_test(symbol, maxSupply, feeSplitterDetail, artistAddress,
+        adminResource.register_token(symbol, maxSupply, feeSplitterDetail, artistAddress,
             tokenStoragePath, tokenPublicPath,
             socialMinterStoragePath, socialMinterPublicPath,
             socialBurnerStoragePath, socialBurnerPublicPath

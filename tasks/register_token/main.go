@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/bjartek/go-with-the-flow/v2/gwtf"
 	"log"
+
+	"github.com/bjartek/go-with-the-flow/v2/gwtf"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	//Register New Token//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("register_token_test").SignProposeAndPayAs("account").StringArgument("S").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("S").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
 	
 	TokenDetails := flow.ScriptFromFile("get_social_details").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
 	

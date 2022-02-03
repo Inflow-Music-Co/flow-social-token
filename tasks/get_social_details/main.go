@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/bjartek/go-with-the-flow/v2/gwtf"
-	
 )
 
 func main() {
@@ -17,7 +16,7 @@ func main() {
 	flow := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
 	//Register Token for a new account
-	flow.TransactionFromFile("register_token_test").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
 	result := flow.ScriptFromFile("get_social_details").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf("Script returned Social Details %s", result)

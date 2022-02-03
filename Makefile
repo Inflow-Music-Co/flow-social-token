@@ -34,7 +34,7 @@ get-social-details:
 
 .PHONY: register-tokens
 register-token:
-	go run ./tasks/register_token_test/main.go
+	go run ./tasks/register_token/main.go
 
 .PHONY: mint-burn-instant
 mint-burn-instant:
