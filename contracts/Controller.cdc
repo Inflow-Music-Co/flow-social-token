@@ -9,7 +9,6 @@ pub contract Controller {
     pub let SpecialCapabilityPrivatePath: PrivatePath
     pub let SocialTokenResourcePrivatePath: PrivatePath
 
-
     pub struct TokenStructure{
         pub var tokenId: String
         pub var symbol: String
@@ -62,13 +61,11 @@ pub contract Controller {
             self.reserve = self.reserve - newReserve
         }
 
-
         pub fun incrementIssuedSupply(_ amount: UFix64){
             pre{
                 self.issuedSupply + amount <= self.maxSupply : "max supply reached"
             }
-            self.issuedSupply =  self.issuedSupply + amount
-
+            self.issuedSupply = self.issuedSupply + amount
         }
 
         pub fun decrementIssuedSupply(_ amount: UFix64){
@@ -104,7 +101,7 @@ pub contract Controller {
         pub fun decrementReserve(_ tokenId: String, _ newReserve: UFix64)
     }
 
-    pub resource Admin: SpecialCapability {  
+    pub resource Admin: SpecialCapability {
         pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
@@ -116,7 +113,7 @@ pub contract Controller {
             let artistAddress = artist
             let resourceOwner = self.owner!.address
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString()) 
-            assert(Controller.allSocialTokens[tokenId]==nil, message:"token already registered")     
+            assert(Controller.allSocialTokens[tokenId]==nil, message:"token already registered")
             Controller.allSocialTokens[tokenId]= Controller.TokenStructure(
                 tokenId, symbol, maxSupply, artistAddress,
                 tokenStoragePath, tokenPublicPath,
@@ -153,7 +150,7 @@ pub contract Controller {
                 tokenId != "" : "token id must not be null"
                 Controller.allSocialTokens[tokenId]!=nil : "token id must not be null"
             }
-            Controller.allSocialTokens[tokenId]!.decrementIssuedSupply(amount)        
+            Controller.allSocialTokens[tokenId]!.decrementIssuedSupply(amount)
         }
         pub fun incrementReserve(_ tokenId: String, _ newResreve: UFix64){
             pre {
@@ -194,27 +191,25 @@ pub contract Controller {
     }
     pub fun getTokenDetails(_ tokenId:String):Controller.TokenStructure{
         pre {
-            tokenId!=nil:"token id must not be null of public functio"
+            tokenId!=nil:"token id must not be null"
+            Controller.allSocialTokens[tokenId]!.tokenId == tokenId : "token id is not same"
             }
-        return self.allSocialTokens[tokenId]!   
+        return self.allSocialTokens[tokenId]! 
     }
     pub fun createSocialTokenResource(): @SocialTokenResource{
-        return <- create SocialTokenResource()    
+        return <- create SocialTokenResource()
     }
-
 
     init(){
         self.allSocialTokens= {}
         self.AdminStoragePath = /storage/ControllerAdmin
-        self.SocialTokenResourceStoragePath = /storage/ControllerSocialTokenResource  
-
+        self.SocialTokenResourceStoragePath = /storage/ControllerSocialTokenResource
 
         self.SpecialCapabilityPrivatePath = /private/ControllerSpecialCapability
         self.SocialTokenResourcePrivatePath = /private/ControllerSocialTokenResourcePrivate
 
-
         self.account.save<@Admin>(<- create Admin(), to: self.AdminStoragePath)
-        self.account.link<&{SpecialCapability}>(  self.SpecialCapabilityPrivatePath, target: self.AdminStoragePath)
+        self.account.link<&{SpecialCapability}>(self.SpecialCapabilityPrivatePath, target: self.AdminStoragePath)
     }
 
 }
