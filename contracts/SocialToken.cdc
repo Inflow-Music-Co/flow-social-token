@@ -108,7 +108,6 @@ pub contract SocialToken : FungibleToken{
             amount > 0.0: "Amount must be greator than zero"
             tokenId != "" : "token id must not be null"
             Controller.getTokenDetails(tokenId).tokenId !=nil: "token not registered"
-            SocialToken.adminRef.borrow() !=nil: "social token does not have controller capability"
         }
         let tokenDetails = Controller.getTokenDetails(tokenId)
         let supply = tokenDetails.issuedSupply
@@ -125,7 +124,6 @@ pub contract SocialToken : FungibleToken{
         pre { 
             amount > 0.0: "Amount must be greator than zero"
             Controller.getTokenDetails(tokenId).tokenId !=nil: "token not registered"
-            SocialToken.adminRef.borrow() !=nil: "social token does not have controller capability"
         }
         let tokenDetails = Controller.getTokenDetails(tokenId)
         assert(tokenDetails.tokenId != "", message:"token id must not be null")
