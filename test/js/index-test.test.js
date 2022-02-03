@@ -167,7 +167,7 @@ describe("Transactions", () => {
     }
   })
   test("test transaction register token", async () => {
-    const name = "registerToken";
+    const name = "register_token_test";
 
     // Import participating accounts
     const Charlie = await getAccountAddress("Charlie");

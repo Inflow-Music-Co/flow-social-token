@@ -45,7 +45,7 @@ func main() {
 	//-------------------------------------------------//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("registerToken").SignProposeAndPayAs("account").StringArgument("S").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("register_token_test").SignProposeAndPayAs("account").StringArgument("S").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
 
 	//-------------------------------------------------//
 	//--------- SETUP AND MINT SOCIAL TOKEN -----------//
@@ -76,7 +76,7 @@ func main() {
 	//-------------------------------------------------//
 
 	//Register Token for a new account
-	flow.TransactionFromFile("registerToken2").SignProposeAndPayAs("account").StringArgument("N").UFix64Argument("10000000.00").AccountArgument("second").RunPrintEventsFull()
+	flow.TransactionFromFile("register_token_test2").SignProposeAndPayAs("account").StringArgument("N").UFix64Argument("10000000.00").AccountArgument("second").RunPrintEventsFull()
 	//First Account sets up Social Minter
 	mintQuote = flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10.00").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ Social Mint Quote N Before ----- %s", mintQuote)

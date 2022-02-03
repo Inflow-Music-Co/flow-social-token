@@ -87,7 +87,7 @@ pub contract Controller {
     }
 
     pub resource interface SpecialCapability {
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun register_token_test( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
@@ -105,7 +105,7 @@ pub contract Controller {
     }
 
     pub resource Admin: SpecialCapability {  
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun register_token_test( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){
@@ -194,7 +194,8 @@ pub contract Controller {
     }
     pub fun getTokenDetails(_ tokenId:String):Controller.TokenStructure{
         pre {
-            tokenId!=nil:"token id must not be null of public functio"
+            tokenId!=nil: "token id must not be valid"
+            Controller.allSocialTokens[tokenId]!.tokenId == tokenId: "token id is not same"
             }
         return self.allSocialTokens[tokenId]!   
     }
