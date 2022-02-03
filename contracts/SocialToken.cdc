@@ -116,8 +116,7 @@ pub contract SocialToken : FungibleToken{
         let newSupply = supply + amount
         let reserve = tokenDetails.reserve
         if supply == 0.0 {
-            let a :UFix64 = 10000.0
-            return ( (tokenDetails.slope * amount * amount)/2.0/a ) 
+            return (tokenDetails.slope.saturatingMultiply((amount.saturatingMultiply(amount)))/2.0/10000.0) 
         } else {
             var totalNewSupply = newSupply.saturatingMultiply(newSupply)
             return (((reserve.saturatingMultiply(totalNewSupply) / supply.saturatingMultiply(supply))) - reserve)

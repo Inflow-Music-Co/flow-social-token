@@ -12,8 +12,8 @@ func main() {
 	g := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
 	//Setup FUSD Vaults for both accounts
-	g.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("first").RunPrintEventsFull();
-	g.TransactionFromFile("setupFusdVault").SignProposeAndPayAs("account").RunPrintEventsFull();
+	g.TransactionFromFile("setup_fusd_vault").SignProposeAndPayAs("first").RunPrintEventsFull();
+	g.TransactionFromFile("setup_fusd_vault").SignProposeAndPayAs("account").RunPrintEventsFull();
 
 	//First Account sets up FUSD Minter
 	g.TransactionFromFile("setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull();

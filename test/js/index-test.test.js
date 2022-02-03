@@ -120,7 +120,7 @@ describe("Deployment", () => {
 
 describe("Transactions", () => {
   test("test transaction for setup admin account", async () => {
-    const name = "setupAdminAccount"
+    const name = "setup_admin_account"
     const Dave = await getAccountAddress("Dave")
     const signers = [Dave]
     const Controller = await getContractAddress("Controller")
@@ -142,7 +142,7 @@ describe("Transactions", () => {
     }
   })
   test("test transaction for add admin account", async () => {
-    const name = "addAdminAccount"
+    const name = "add_admin_account"
     const Charlie = await getAccountAddress("Charlie")
     const signers = [Charlie]
     const Controller = await getContractAddress("Controller")
@@ -205,7 +205,7 @@ describe("Transactions", () => {
     // expect(txResult[0].errorMessage).toBe("");
   });
   test("test transaction setup fusd vault", async () => {
-    const name = "setupFusdVault";
+    const name = "setup_fusd_vault";
 
     const accountNames = ["Charlie", "Eve", "Faythe"]
     for (var i = 0; i < accountNames.length; i++) {
@@ -270,7 +270,7 @@ describe("Transactions", () => {
     // expect(txResult[0].errorMessage).toBe("");
   });
   test("test transaction set minter FUSD", async () => {
-    const name = "setMinterProxy";
+    const name = "set_minter_proxy";
 
     // Import participating accounts
     const Bob = await getAccountAddress("Bob");
