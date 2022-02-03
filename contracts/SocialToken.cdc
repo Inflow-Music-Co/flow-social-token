@@ -9,8 +9,8 @@ pub contract SocialToken : FungibleToken{
     pub event TokensInitialized(initialSupply: UFix64)
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
     pub event TokensDeposited(amount: UFix64, to: Address?)
-    pub event TokensMinted(_ tokenId: String, _ amount: UFix64)
-    pub event TokensBurned(_ tokenId: String, _ amount: UFix64)
+    pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)
+    pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64,  _ amount: UFix64)
 
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
 
@@ -172,7 +172,7 @@ pub contract SocialToken : FungibleToken{
             SocialToken.totalSupply = SocialToken.totalSupply + amount
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
-            emit TokensMinted(tokenId, amount)
+            emit TokensMinted(tokenId,mintPrice, amount)
             return <- tempraryVar
             }
     }
@@ -188,7 +188,7 @@ pub contract SocialToken : FungibleToken{
             let tokenDetails = Controller.getTokenDetails(tokenId)
             SocialToken.adminRef.borrow()!.decrementIssuedSupply(tokenId, amount)
             SocialToken.adminRef.borrow()!.decrementReserve(tokenId, burnPrice)
-            emit TokensBurned(tokenId, amount)
+            emit TokensBurned(tokenId, burnPrice, amount)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }
