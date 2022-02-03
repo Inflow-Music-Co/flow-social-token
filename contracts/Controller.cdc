@@ -84,7 +84,7 @@ pub contract Controller {
     }
 
     pub resource interface SpecialCapability {
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun register_token_test( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
