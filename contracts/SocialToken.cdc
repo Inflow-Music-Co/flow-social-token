@@ -4,13 +4,15 @@ import FUSD from 0xf8d6e0586b0a20c7
 
 pub contract SocialToken : FungibleToken{
 
+    // Total supply of all social tokens that are minted using this contract
     pub var totalSupply:UFix64
-    
+
+    // Events
     pub event TokensInitialized(initialSupply: UFix64)
     pub event TokensWithdrawn(amount: UFix64, from: Address?)
     pub event TokensDeposited(amount: UFix64, to: Address?)
     pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)
-    pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64,  _ amount: UFix64)
+    pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64, _ amount: UFix64)
 
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
 
@@ -88,6 +90,7 @@ pub contract SocialToken : FungibleToken{
             self.balance = _balance
         }
     }
+    
     access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault{
         let amount = fusdPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
