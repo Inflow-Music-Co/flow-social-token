@@ -13,7 +13,10 @@ pub contract SocialToken: FungibleToken {
     pub event TokensDeposited(amount: UFix64, to: Address?)
     pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)
     pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64, _ amount: UFix64)
+    pub event MintedTokenPrice(_ tokenId: String, _ mintPrice: UFix64)
+    pub event BurnedTokenPrice(_ tokenId: String, _ mintPrice: UFix64)
 
+    
     // a variable that store admin capability to utilize methods of controller contract
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
     // a variable which will store the structure of FUSDPool
@@ -182,7 +185,7 @@ pub contract SocialToken: FungibleToken {
         assert(tokenDetails.tokenId != "", message:"token id must not be null")
         let supply = tokenDetails.issuedSupply
         assert((supply > 0.0), message: "Token supply is zero")
-        assert((supply>=amount), message: "amount greater than supply")
+        assert((supply >= amount), message: "amount greater than supply")
         let newSupply = supply - amount
         var _reserve = tokenDetails.reserve
         let totalNewSupply = newSupply.saturatingMultiply(newSupply)
@@ -218,6 +221,7 @@ pub contract SocialToken: FungibleToken {
             var remainingFUSD = 0.0
             var remainingSocialToken = 0.0
             let mintPrice = SocialToken.getMintPrice(tokenId, amount)
+            let mintedTokenPrice = SocialToken.getMintPrice(tokenId, 1.0)
             assert(fusdPayment.balance >= mintPrice, message: "You don't have sufficient balance to mint tokens")
             var totalPayment = fusdPayment.balance
             assert(totalPayment>=mintPrice, message: "No payment yet")
@@ -237,13 +241,16 @@ pub contract SocialToken: FungibleToken {
             SocialToken.totalSupply = SocialToken.totalSupply + amount
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
-            emit TokensMinted(tokenId,mintPrice, amount)
+            emit TokensMinted(tokenId, mintPrice, amount)
+            emit MintedTokenPrice(tokenId, mintedTokenPrice)
             return <- tempraryVar
-            }
+        }
     }
+
     pub resource interface BurnerPublic {
         pub fun burnTokens(from: @FungibleToken.Vault) : @FungibleToken.Vault
     }
+
     pub resource Burner : BurnerPublic {
         // burnTokens burns tokens
         // 
@@ -257,11 +264,13 @@ pub contract SocialToken: FungibleToken {
             let vault <- from as! @SocialToken.Vault
             let amount = vault.balance
             let tokenId = vault.getTokenId()
+            let burnedTokenPrice = SocialToken.getBurnPrice(tokenId, 1.0)
             let burnPrice = SocialToken.getBurnPrice(tokenId, amount)
             let tokenDetails = Controller.getTokenDetails(tokenId)
             SocialToken.adminRef.borrow()!.decrementIssuedSupply(tokenId, amount)
             SocialToken.adminRef.borrow()!.decrementReserve(tokenId, burnPrice)
             emit TokensBurned(tokenId, burnPrice, amount)
+            emit BurnedTokenPrice(tokenId, burnedTokenPrice)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }
