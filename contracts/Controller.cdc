@@ -118,7 +118,7 @@ pub contract Controller {
     pub resource interface SocialTokenResourcePublic {
         pub fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64)
         pub fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64)
-        pub fun incrementReserve(_ tokenId: String, _ newResreve: UFix64)
+        pub fun incrementReserve(_ tokenId: String, _ newReserve: UFix64)
         pub fun decrementReserve(_ tokenId: String, _ newReserve: UFix64)
     }
 
@@ -181,20 +181,20 @@ pub contract Controller {
         }
 
         // method to increment reserve of a token, only access by the verified user
-        pub fun incrementReserve(_ tokenId: String, _ newResreve: UFix64) {
+        pub fun incrementReserve(_ tokenId: String, _ newReserve: UFix64) {
             pre {
-                newResreve != nil: "reserve must not be null"
-                newResreve > 0.0 : "reserve must be greater than zero"
+                newReserve != nil: "reserve must not be null"
+                newReserve > 0.0 : "reserve must be greater than zero"
                 
             }
-            Controller.allSocialTokens[tokenId]!.incrementReserve(newResreve)
+            Controller.allSocialTokens[tokenId]!.incrementReserve(newReserve)
         }
 
         // method to decrement reserve of a token, only access by the verified user
         pub fun decrementReserve(_ tokenId: String, _ newReserve: UFix64) {
         
             pre {
-                newResreve != nil: "reserve must not be null"
+                newReserve != nil: "reserve must not be null"
                 newReserve > 0.0: "reserve must be greater than zero"
                 
             }
