@@ -166,6 +166,7 @@ pub contract SocialToken: FungibleToken {
         let supply = tokenDetails.issuedSupply
         let newSupply = supply + amount
         let reserve = tokenDetails.reserve
+        assert(amount + tokenDetails.issuedSupply < tokenDetails.maxSupply , message: "maximum supply reached")
         if supply == 0.0 {
             return (tokenDetails.slope.saturatingMultiply((amount.saturatingMultiply(amount)))/2.0/10000.0) 
         } else {
@@ -182,7 +183,7 @@ pub contract SocialToken: FungibleToken {
         assert(tokenDetails.tokenId != "", message:"token id must not be null")
         let supply = tokenDetails.issuedSupply
         assert((supply > 0.0), message: "Token supply is zero")
-        assert((supply>=amount), message: "amount greater than supply")
+        assert((supply >= amount), message: "amount greater than supply")
         let newSupply = supply - amount
         var _reserve = tokenDetails.reserve
         let totalNewSupply = newSupply.saturatingMultiply(newSupply)
