@@ -169,7 +169,7 @@ pub contract SocialToken: FungibleToken {
         let supply = tokenDetails.issuedSupply
         let newSupply = supply + amount
         let reserve = tokenDetails.reserve
-        assert(amount + tokenDetails.issuedSupply < tokenDetails.maxSupply , message: "maximum supply reached")
+        assert(amount + tokenDetails.issuedSupply <= tokenDetails.maxSupply , message: "maximum supply reached")
         if supply == 0.0 {
             return (tokenDetails.slope.saturatingMultiply((amount.saturatingMultiply(amount)))/2.0/10000.0) 
         } else {
