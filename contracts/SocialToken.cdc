@@ -138,7 +138,7 @@ pub contract SocialToken : FungibleToken{
             self.balance = _balance
         }
     }
-
+    // method to distribute fee of a token when a token minted, distribute to admin and artist
     access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault{
         let amount = fusdPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
@@ -191,8 +191,21 @@ pub contract SocialToken : FungibleToken{
         pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault,receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault
     }
 
-    pub resource Minter:MinterPublic {
-
+    pub resource Minter: MinterPublic {
+        // mintTokens mints new tokens
+        // 
+        // Parameters:
+        // tokenId: The ID of the token that will be minted
+        // amount: amount to pay for the tokens
+        // fusdPayment: will take the fusd balance
+        // receiverVault: will return the remaining balance to the user
+        // Pre-Conditions:
+        // tokenId must not be null
+        // amoutn must be greater than zero
+        // issued supply will be less than or equal to maximum supply
+        // 
+        // Returns: The SocialToken Vault
+        // 
         pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
@@ -203,7 +216,6 @@ pub contract SocialToken : FungibleToken{
             var remainingFUSD = 0.0
             var remainingSocialToken = 0.0
             let mintPrice = SocialToken.getMintPrice(tokenId, amount)
-
             assert(fusdPayment.balance >= mintPrice, message: "You don't have sufficient balance to mint tokens")
             var totalPayment = fusdPayment.balance
             assert(totalPayment>=mintPrice, message: "No payment yet")
@@ -231,6 +243,14 @@ pub contract SocialToken : FungibleToken{
         pub fun burnTokens(from: @FungibleToken.Vault) : @FungibleToken.Vault
     }
     pub resource Burner : BurnerPublic {
+        // burnTokens burns tokens
+        // 
+        // Parameters:
+        // It will take the Vault
+        // and burn the tokens, decrement the issued supply and reserve of the tokens
+        // 
+        // Returns: The Vault
+        // 
         pub fun burnTokens( from: @FungibleToken.Vault): @FungibleToken.Vault{
             let vault <- from as! @SocialToken.Vault
             let amount = vault.balance
@@ -276,8 +296,7 @@ pub contract SocialToken : FungibleToken{
             _provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider),
             _balance : self.account.getCapability<&FUSD.Vault{FungibleToken.Balance}>(/public/fusdBalance)
         )
-        
-        self.account.save(<- create Minter(), to: /storage/Minter)
+
         emit TokensInitialized(initialSupply:self.totalSupply)
     }
 }
