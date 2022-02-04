@@ -2,13 +2,13 @@ import FungibleToken from 0xee82856bf20e2aa6
 pub contract Controller {
 
     // Variable size dictionary of TokenStructure
-    access(contract) var allSocialTokens :{String:TokenStructure}
+    access(contract) var allSocialTokens: {String: TokenStructure}
 
-    //events
-    //event for incrementReserve
-    pub event incrementReserve(_ newReserve:UFix64)
+    // Events
+    // Event for incrementReserve
+    pub event incrementReserve(_ newReserve: UFix64)
     //event for decrementReserve
-    pub event decrementReserve(_ newReserve:UFix64)
+    pub event decrementReserve(_ newReserve: UFix64)
     //event for incrementIssuedSupply
     pub event incrementIssuedSupply(_ amount: UFix64)
     //event for decrementIssuedSupply
@@ -19,7 +19,6 @@ pub contract Controller {
     pub event updatePercentage(_ percentage: UFix64)
     
     // Paths
-
     pub let AdminStoragePath: StoragePath
     pub var SocialTokenResourceStoragePath: StoragePath
 
@@ -27,14 +26,14 @@ pub contract Controller {
     pub let SocialTokenResourcePrivatePath: PrivatePath
 
     // A structure that contains all the data related to the Token 
-    pub struct TokenStructure{
+    pub struct TokenStructure {
         pub var tokenId: String
         pub var symbol: String
         pub var issuedSupply: UFix64
         pub var maxSupply: UFix64
         pub var artist: Address
         pub var slope: UFix64
-        pub var feeSplitterDetail : {Address:FeeStructure}
+        pub var feeSplitterDetail: {Address: FeeStructure}
         pub var reserve: UFix64
         pub var tokenResourceStoragePath: StoragePath
         pub var tokenResourcePublicPath: PublicPath
@@ -46,7 +45,7 @@ pub contract Controller {
         init(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
-            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){
+            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath) {
             self.tokenId = tokenId
             self.symbol = symbol
             self.issuedSupply = 0.0
@@ -63,7 +62,7 @@ pub contract Controller {
             self.socialBurnerPublicPath = socialBurnerPublicPath
         }
 
-        pub fun incrementReserve(_ newReserve:UFix64){
+        pub fun incrementReserve(_ newReserve: UFix64) {
             pre {
                 newReserve != nil: "reserve must not be null"
                 newReserve > 0.0 : "reserve must be greater than zero"
@@ -72,7 +71,7 @@ pub contract Controller {
             emit incrementReserve(newReserve)
         }
 
-        pub fun decrementReserve(_ newReserve:UFix64){
+        pub fun decrementReserve(_ newReserve: UFix64){
             pre {
                 newReserve != nil: "reserve must not be null"
                 newReserve > 0.0 : "reserve must be greater than zero"
@@ -81,15 +80,15 @@ pub contract Controller {
             emit decrementReserve(newReserve)
         }
 
-        pub fun incrementIssuedSupply(_ amount: UFix64){
+        pub fun incrementIssuedSupply(_ amount: UFix64) {
             pre{
-                self.issuedSupply + amount <= self.maxSupply : "max supply reached"
+                self.issuedSupply + amount <= self.maxSupply: "max supply reached"
             }
             self.issuedSupply = self.issuedSupply + amount
             emit incrementIssuedSupply(amount)
         }
 
-        pub fun decrementIssuedSupply(_ amount: UFix64){
+        pub fun decrementIssuedSupply(_ amount: UFix64) {
             pre {
                 self.issuedSupply - amount >= 0.0 : "issued supply must not be zero"
             }
@@ -98,7 +97,7 @@ pub contract Controller {
         
         }
         
-        pub fun setFeeSpliterDetail(_ feeSplitterDetail:{Address: FeeStructure}){
+        pub fun setFeeSpliterDetail(_ feeSplitterDetail: {Address: FeeStructure}) {
             pre {
             }
             self.feeSplitterDetail = feeSplitterDetail
@@ -106,7 +105,7 @@ pub contract Controller {
     }
 
     pub resource interface SpecialCapability {
-        pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address: FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
@@ -119,7 +118,7 @@ pub contract Controller {
     pub resource interface SocialTokenResourcePublic {
         pub fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64)
         pub fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64)
-        pub fun incrementReserve(_ tokenId: String, _ newResreve: UFix64)
+        pub fun incrementReserve(_ tokenId: String, _ newReserve: UFix64)
         pub fun decrementReserve(_ tokenId: String, _ newReserve: UFix64)
     }
 
@@ -127,15 +126,15 @@ pub contract Controller {
         pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
-            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath){
-            pre{
+            _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath) {
+            pre {
                 symbol !=nil: "symbol must not be null"
                 maxSupply > 0.0: "max supply must be greater than zero"
             }
             let artistAddress = artist
             let resourceOwner = self.owner!.address
             let tokenId = (symbol.concat("_")).concat(artistAddress.toString()) 
-            assert(Controller.allSocialTokens[tokenId]==nil, message:"token already registered")
+            assert(Controller.allSocialTokens[tokenId] == nil, message:"token already registered")
             Controller.allSocialTokens[tokenId]= Controller.TokenStructure(
                 tokenId, symbol, maxSupply, artistAddress,
                 tokenStoragePath, tokenPublicPath,
@@ -162,7 +161,7 @@ pub contract Controller {
         }
 
         //method to increment issued supply, only access by the verified user
-        pub fun incrementIssuedSupply(_ tokenId: String, _ amount:UFix64){
+        pub fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64){
             pre {
                 amount > 0.0: "Amount must be greator than zero"
                 tokenId != "" : "token id must not be null"
@@ -170,8 +169,9 @@ pub contract Controller {
             }
             Controller.allSocialTokens[tokenId]!.incrementIssuedSupply(amount)
         }
-        //method to decrement issued supply, only access by the verified user
-        pub fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64){
+        
+        // method to decrement issued supply, only access by the verified user
+        pub fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64) {
             pre {
                 amount > 0.0: "Amount must be greator than zero"
                 tokenId != "" : "token id must not be null"
@@ -179,24 +179,26 @@ pub contract Controller {
             }
             Controller.allSocialTokens[tokenId]!.decrementIssuedSupply(amount)
         }
-        //method to increment reserve of a token, only access by the verified user
-        pub fun incrementReserve(_ tokenId: String, _ newResreve: UFix64){
+
+        // method to increment reserve of a token, only access by the verified user
+        pub fun incrementReserve(_ tokenId: String, _ newReserve: UFix64) {
             pre {
-                newResreve != nil: "reserve must not be null"
-                newResreve > 0.0 : "reserve must be greater than zero"
+                newReserve != nil: "reserve must not be null"
+                newReserve > 0.0 : "reserve must be greater than zero"
                 
             }
-            Controller.allSocialTokens[tokenId]!.incrementReserve(newResreve)
+            Controller.allSocialTokens[tokenId]!.incrementReserve(newReserve)
         }
-        //method to decrement reserve of a token, only access by the verified user
-        pub fun decrementReserve(_ tokenId: String, _ newResreve: UFix64){
+
+        // method to decrement reserve of a token, only access by the verified user
+        pub fun decrementReserve(_ tokenId: String, _ newReserve: UFix64) {
         
             pre {
-                newResreve != nil: "reserve must not be null"
-                newResreve > 0.0 : "reserve must be greater than zero"
+                newReserve != nil: "reserve must not be null"
+                newReserve > 0.0: "reserve must be greater than zero"
                 
             }
-            Controller.allSocialTokens[tokenId]!.decrementReserve(newResreve)
+            Controller.allSocialTokens[tokenId]!.decrementReserve(newReserve)
         }
         
         init(){
@@ -204,36 +206,39 @@ pub contract Controller {
         
         }
     }
+
     // A structure that contains all the data related to the Fee
-    pub struct FeeStructure{
+    pub struct FeeStructure {
         pub var percentage: UFix64
 
-        init(_ percentage: UFix64){
+        init(_ percentage: UFix64) {
             self.percentage = percentage
         }
         // method to update the percentage of the token
-        access(account) fun updatePercentage(_ percentage: UFix64){ 
+        access(account) fun updatePercentage(_ percentage: UFix64) { 
             pre {
-                percentage >0.0: "Percentage should be greater than zero"
+                percentage > 0.0: "Percentage should be greater than zero"
             }
             self.percentage = percentage
             emit updatePercentage(percentage)
         }
     }
+
     // method to get all the token details
-    pub fun getTokenDetails(_ tokenId:String):Controller.TokenStructure{
+    pub fun getTokenDetails(_ tokenId: String): Controller.TokenStructure {
         pre {
-            tokenId!=nil:"token id must not be null"
-            Controller.allSocialTokens[tokenId]!.tokenId == tokenId : "token id is not same"
+            tokenId != nil: "token id must not be null"
+            Controller.allSocialTokens[tokenId]!.tokenId == tokenId: "token id is not same"
             }
         return self.allSocialTokens[tokenId]! 
     }
+    
     // method to create a SocialTokenResource
-    pub fun createSocialTokenResource(): @SocialTokenResource{
+    pub fun createSocialTokenResource(): @SocialTokenResource {
         return <- create SocialTokenResource()
     }
 
-    init(){
+    init() {
         self.allSocialTokens= {}
         self.AdminStoragePath = /storage/ControllerAdmin
         self.SocialTokenResourceStoragePath = /storage/ControllerSocialTokenResource
@@ -244,5 +249,4 @@ pub contract Controller {
         self.account.save<@Admin>(<- create Admin(), to: self.AdminStoragePath)
         self.account.link<&{SpecialCapability}>(self.SpecialCapabilityPrivatePath, target: self.AdminStoragePath)
     }
-
 }

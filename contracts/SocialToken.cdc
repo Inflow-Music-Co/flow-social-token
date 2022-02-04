@@ -2,7 +2,7 @@ import FungibleToken from 0xee82856bf20e2aa6
 import Controller from 0xf8d6e0586b0a20c7
 import FUSD from 0xf8d6e0586b0a20c7
 
-pub contract SocialToken : FungibleToken{
+pub contract SocialToken: FungibleToken {
 
     // Total supply of all social tokens that are minted using this contract
     pub var totalSupply:UFix64
@@ -20,7 +20,7 @@ pub contract SocialToken : FungibleToken{
     pub var collateralPool: FUSDPool
 
     pub resource interface SocialTokenPublic{
-        pub fun getTokenId():String 
+        pub fun getTokenId(): String 
     }
     // Vault
     //
@@ -61,7 +61,7 @@ pub contract SocialToken : FungibleToken{
         // It is allowed to destroy the sent Vault because the Vault
         // was a temporary holder of the tokens. The Vault's balance has
         // been consumed and therefore can be destroyed.
-        pub fun deposit(from : @FungibleToken.Vault){
+        pub fun deposit(from : @FungibleToken.Vault) {
             let vault <- from as! @SocialToken.Vault
             if(self.tokenId == ""){
                 self.tokenId = vault.tokenId 
@@ -85,13 +85,14 @@ pub contract SocialToken : FungibleToken{
             self.balance = self.balance - amount
             let vault <- create Vault(balance:amount)
             vault.setTokenId(self.tokenId)
-            emit TokensWithdrawn(amount:amount, from: self.owner!.address)
+            emit TokensWithdrawn(amount: amount, from: self.owner!.address)
             return <- vault
         }
         destroy () {
             SocialToken.totalSupply = SocialToken.totalSupply - self.balance
         }
     }
+
     // createEmptyVault
     //
     // Function that creates a new Vault with a balance of zero
@@ -99,9 +100,10 @@ pub contract SocialToken : FungibleToken{
     // and store the returned Vault in their storage in order to allow their
     // account to be able to receive deposits of this token type.
     //
-    pub fun createEmptyVault(): @Vault{
+    pub fun createEmptyVault(): @Vault {
         return <- create Vault(balance:0.0)
     }
+
     // createNewMinter
     //
     // Function that creates a new minter
@@ -109,9 +111,10 @@ pub contract SocialToken : FungibleToken{
     // and store the returned Minter in their storage in order to allow their
     // account to be able to mint new tokens.
     //
-    pub fun createNewMinter():@Minter{
+    pub fun createNewMinter(): @Minter {
         return <- create Minter()
     }
+    
     // createNewBurner
     //
     // Function that creates a new burner
@@ -119,9 +122,10 @@ pub contract SocialToken : FungibleToken{
     // and store the returned Burner in their storage in order to allow their
     // account to be able to burn tokens.
     //
-    pub fun createNewBurner():@Burner{
+    pub fun createNewBurner():@Burner {
         return <- create Burner()
     }
+
     // A structure that contains all the data related to the FUSDPool
     pub struct FUSDPool {
         pub let receiver: Capability<&{FungibleToken.Receiver}>
@@ -171,7 +175,7 @@ pub contract SocialToken : FungibleToken{
             return (((reserve.saturatingMultiply(totalNewSupply) / supply.saturatingMultiply(supply))) - reserve)
         }
     }  
-    pub fun getBurnPrice(_ tokenId: String, _ amount: UFix64): UFix64{
+    pub fun getBurnPrice(_ tokenId: String, _ amount: UFix64): UFix64 {
         pre { 
             amount > 0.0: "Amount must be greator than zero"
             Controller.getTokenDetails(tokenId).tokenId !=nil: "token not registered"
@@ -187,7 +191,7 @@ pub contract SocialToken : FungibleToken{
         return (_reserve - ((_reserve.saturatingMultiply(totalNewSupply)) / (supply.saturatingMultiply(supply))))
     }
     
-    pub resource interface MinterPublic{
+    pub resource interface MinterPublic {
         pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault,receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault
     }
 
