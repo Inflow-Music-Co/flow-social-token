@@ -19,7 +19,7 @@ transaction (symbol: String, maxSupply: UFix64, artistAddress: Address){
         let socialMinterPublicPath = /public/InflowSymbol_0x5Minter
         let socialBurnerStoragePath = /storage/InflowSymbol_0x5Burner
         let socialBurnerPublicPath = /public/InflowSymbol_0x5Burner
-        adminResource.register_token(symbol, maxSupply, feeSplitterDetail, artistAddress,
+        adminResource.registerToken(symbol, maxSupply, feeSplitterDetail, artistAddress,
             tokenStoragePath, tokenPublicPath,
             socialMinterStoragePath, socialMinterPublicPath,
             socialBurnerStoragePath, socialBurnerPublicPath

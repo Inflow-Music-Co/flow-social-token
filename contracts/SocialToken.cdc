@@ -5,7 +5,7 @@ import FUSD from 0xf8d6e0586b0a20c7
 pub contract SocialToken: FungibleToken {
 
     // Total supply of all social tokens that are minted using this contract
-    pub var totalSupply:UFix64
+    pub var totalSupply: UFix64
 
     // Events
     pub event TokensInitialized(initialSupply: UFix64)
@@ -19,7 +19,7 @@ pub contract SocialToken: FungibleToken {
     // a variable which will store the structure of FUSDPool
     pub var collateralPool: FUSDPool
 
-    pub resource interface SocialTokenPublic{
+    pub resource interface SocialTokenPublic {
         pub fun getTokenId(): String 
     }
     // Vault
@@ -39,19 +39,17 @@ pub contract SocialToken: FungibleToken {
         pub var balance: UFix64
         pub var tokenId: String
 
-
-        init(balance: UFix64){
+        init(balance: UFix64) {
             self.balance = balance
             self.tokenId = ""
-
         }
-        pub fun setTokenId(_ tokenId: String){
-            pre{
+        pub fun setTokenId(_ tokenId: String) {
+            pre {
                 tokenId !=nil: "token id must not be null"
             }
             self.tokenId = tokenId
         }
-        pub fun getTokenId(): String{
+        pub fun getTokenId(): String {
             return self.tokenId
         }
         // deposit
@@ -63,7 +61,7 @@ pub contract SocialToken: FungibleToken {
         // been consumed and therefore can be destroyed.
         pub fun deposit(from : @FungibleToken.Vault) {
             let vault <- from as! @SocialToken.Vault
-            if(self.tokenId == ""){
+            if(self.tokenId == "") {
                 self.tokenId = vault.tokenId 
             }
             assert(vault.tokenId == self.tokenId, message:"error: invalid token id") 
@@ -101,7 +99,7 @@ pub contract SocialToken: FungibleToken {
     // account to be able to receive deposits of this token type.
     //
     pub fun createEmptyVault(): @Vault {
-        return <- create Vault(balance:0.0)
+        return <- create Vault(balance: 0.0)
     }
 
     // createNewMinter
@@ -122,7 +120,7 @@ pub contract SocialToken: FungibleToken {
     // and store the returned Burner in their storage in order to allow their
     // account to be able to burn tokens.
     //
-    pub fun createNewBurner():@Burner {
+    pub fun createNewBurner(): @Burner {
         return <- create Burner()
     }
 
@@ -143,7 +141,7 @@ pub contract SocialToken: FungibleToken {
         }
     }
     // method to distribute fee of a token when a token minted, distribute to admin and artist
-    access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault{
+    access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
         let amount = fusdPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
         for address in tokenDetails.feeSplitterDetail.keys {
@@ -192,7 +190,7 @@ pub contract SocialToken: FungibleToken {
     }
     
     pub resource interface MinterPublic {
-        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault,receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault
+        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault
     }
 
     pub resource Minter: MinterPublic {
@@ -243,7 +241,7 @@ pub contract SocialToken: FungibleToken {
             return <- tempraryVar
             }
     }
-    pub resource interface BurnerPublic{
+    pub resource interface BurnerPublic {
         pub fun burnTokens(from: @FungibleToken.Vault) : @FungibleToken.Vault
     }
     pub resource Burner : BurnerPublic {
@@ -255,7 +253,7 @@ pub contract SocialToken: FungibleToken {
         // 
         // Returns: The Vault
         // 
-        pub fun burnTokens( from: @FungibleToken.Vault): @FungibleToken.Vault{
+        pub fun burnTokens( from: @FungibleToken.Vault): @FungibleToken.Vault {
             let vault <- from as! @SocialToken.Vault
             let amount = vault.balance
             let tokenId = vault.getTokenId()
@@ -269,7 +267,7 @@ pub contract SocialToken: FungibleToken {
         }
     }
 
-    init(){
+    init() {
         self.totalSupply = 0.0
 
         var adminPrivateCap = self.account.getCapability
@@ -300,7 +298,6 @@ pub contract SocialToken: FungibleToken {
             _provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider),
             _balance : self.account.getCapability<&FUSD.Vault{FungibleToken.Balance}>(/public/fusdBalance)
         )
-
         emit TokensInitialized(initialSupply:self.totalSupply)
     }
 }

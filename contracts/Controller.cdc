@@ -5,17 +5,17 @@ pub contract Controller {
     access(contract) var allSocialTokens: {String: TokenStructure}
 
     // Events
-    // Event for incrementReserve
-    pub event incrementReserve(_ newReserve: UFix64)
-    //event for decrementReserve
-    pub event decrementReserve(_ newReserve: UFix64)
-    //event for incrementIssuedSupply
+    // Emitted when a Reserve is incremented while minting social tokens
+    pub event incrementReserve(_ newReserve:UFix64)
+    // Emitted when a Reserve is decremented while minting social tokens
+    pub event decrementReserve(_ newReserve:UFix64)
+    // Emitted when a IssuedSupply is incremented after minting social tokens
     pub event incrementIssuedSupply(_ amount: UFix64)
-    //event for decrementIssuedSupply
+    // Emitted when a IssuedSupply is decremented after minting social tokens
     pub event decrementIssuedSupply(_ amount: UFix64)
-    //event for register_token
-    pub event register_token(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address)
-    //event for updatePercentage
+    // Emitted when a social Token is registered 
+    pub event registerToken(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address)
+    // Emitted when a Percentage of social token is updated 
     pub event updatePercentage(_ percentage: UFix64)
     
     // Paths
@@ -96,7 +96,7 @@ pub contract Controller {
             emit decrementIssuedSupply(amount)
         
         }
-        
+
         pub fun setFeeSpliterDetail(_ feeSplitterDetail: {Address: FeeStructure}) {
             pre {
             }
@@ -105,7 +105,7 @@ pub contract Controller {
     }
 
     pub resource interface SpecialCapability {
-        pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address: FeeStructure}, _ artist: Address,
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address: FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
@@ -123,7 +123,7 @@ pub contract Controller {
     }
 
     pub resource Admin: SpecialCapability {
-        pub fun register_token( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath) {
@@ -141,7 +141,7 @@ pub contract Controller {
                 socialMinterStoragePath, socialMinterPublicPath,
                 socialBurnerStoragePath, socialBurnerPublicPath)
             Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
-            emit register_token(tokenId, symbol, maxSupply, artistAddress)
+            emit registerToken(tokenId, symbol, maxSupply, artistAddress)
         } 
     }
 
