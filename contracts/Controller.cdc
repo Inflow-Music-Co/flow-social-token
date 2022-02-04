@@ -1,10 +1,11 @@
 import FungibleToken from 0xee82856bf20e2aa6
 pub contract Controller {
 
-    access(contract) var allSocialTokens : {String: TokenStructure}
+    // Variable size dictionary of TokenStructure
+    access(contract) var allSocialTokens: {String: TokenStructure}
 
-    //events
-    //event for incrementReserve
+    // Events
+    // Event for incrementReserve
     pub event incrementReserve(_ newReserve: UFix64)
     //event for decrementReserve
     pub event decrementReserve(_ newReserve: UFix64)
@@ -17,12 +18,14 @@ pub contract Controller {
     //event for updatePercentage
     pub event updatePercentage(_ percentage: UFix64)
     
+    // Paths
     pub let AdminStoragePath: StoragePath
     pub var SocialTokenResourceStoragePath: StoragePath
 
     pub let SpecialCapabilityPrivatePath: PrivatePath
     pub let SocialTokenResourcePrivatePath: PrivatePath
 
+    // A structure that contains all the data related to the Token 
     pub struct TokenStructure {
         pub var tokenId: String
         pub var symbol: String
@@ -143,8 +146,9 @@ pub contract Controller {
     }
 
     pub resource SocialTokenResource : SocialTokenResourcePublic , UserSpecialCapability {
-        
+        // a variable that store user capability to utilize methods 
         access(contract) var capability: Capability<&{SpecialCapability}>?
+        // method which provide capability to user to utilize methods
         pub fun addCapability (cap: Capability<&{SpecialCapability}>){
             pre {
                 // we make sure the SpecialCapability is 
@@ -156,7 +160,8 @@ pub contract Controller {
             self.capability = cap
         }
 
-        pub fun incrementIssuedSupply(_ tokenId: String, _ amount:UFix64) {
+        //method to increment issued supply, only access by the verified user
+        pub fun incrementIssuedSupply(_ tokenId: String, _ amount: UFix64){
             pre {
                 amount > 0.0: "Amount must be greator than zero"
                 tokenId != "" : "token id must not be null"
@@ -164,7 +169,8 @@ pub contract Controller {
             }
             Controller.allSocialTokens[tokenId]!.incrementIssuedSupply(amount)
         }
-
+        
+        // method to decrement issued supply, only access by the verified user
         pub fun decrementIssuedSupply(_ tokenId: String, _ amount: UFix64) {
             pre {
                 amount > 0.0: "Amount must be greator than zero"
@@ -174,6 +180,7 @@ pub contract Controller {
             Controller.allSocialTokens[tokenId]!.decrementIssuedSupply(amount)
         }
 
+        // method to increment reserve of a token, only access by the verified user
         pub fun incrementReserve(_ tokenId: String, _ newResreve: UFix64) {
             pre {
                 newResreve != nil: "reserve must not be null"
@@ -183,14 +190,15 @@ pub contract Controller {
             Controller.allSocialTokens[tokenId]!.incrementReserve(newResreve)
         }
 
-        pub fun decrementReserve(_ tokenId: String, _ newResreve: UFix64) {
+        // method to decrement reserve of a token, only access by the verified user
+        pub fun decrementReserve(_ tokenId: String, _ newReserve: UFix64) {
         
             pre {
                 newResreve != nil: "reserve must not be null"
-                newResreve > 0.0: "reserve must be greater than zero"
+                newReserve > 0.0: "reserve must be greater than zero"
                 
             }
-            Controller.allSocialTokens[tokenId]!.decrementReserve(newResreve)
+            Controller.allSocialTokens[tokenId]!.decrementReserve(newReserve)
         }
         
         init(){
@@ -198,27 +206,34 @@ pub contract Controller {
         
         }
     }
+
+    // A structure that contains all the data related to the Fee
     pub struct FeeStructure {
         pub var percentage: UFix64
 
         init(_ percentage: UFix64) {
             self.percentage = percentage
         }
+        // method to update the percentage of the token
         access(account) fun updatePercentage(_ percentage: UFix64) { 
             pre {
-                percentage >0.0: "Percentage should be greater than zero"
+                percentage > 0.0: "Percentage should be greater than zero"
             }
             self.percentage = percentage
             emit updatePercentage(percentage)
         }
     }
-    pub fun getTokenDetails(_ tokenId:String):Controller.TokenStructure {
+
+    // method to get all the token details
+    pub fun getTokenDetails(_ tokenId: String): Controller.TokenStructure {
         pre {
-            tokenId!=nil:"token id must not be null"
+            tokenId != nil: "token id must not be null"
             Controller.allSocialTokens[tokenId]!.tokenId == tokenId: "token id is not same"
             }
         return self.allSocialTokens[tokenId]! 
     }
+    
+    // method to create a SocialTokenResource
     pub fun createSocialTokenResource(): @SocialTokenResource {
         return <- create SocialTokenResource()
     }
