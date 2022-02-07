@@ -44,6 +44,10 @@ transfer-token-different-vaults-negative:
 transfer-token-same-vaults:
 	go run ./tasks/transfer_token_same_vaults/main.go
 
+.PHONY: mint-total-supply
+mint-total-supply:
+	go run ./tasks/mint_total_supply/main.go
+
 .PHONY: mint-burn-100-tokens
 mint-burn-100-tokens:
 	go run ./tasks/mint_burn_100_tokens/main.go
