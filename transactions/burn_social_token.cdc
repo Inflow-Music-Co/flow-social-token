@@ -3,7 +3,7 @@ import SocialToken from 0xf8d6e0586b0a20c7
 import Controller from 0xf8d6e0586b0a20c7
 
 
-transaction (tokenId: String, amountArtistToken:UFix64){
+transaction (tokenId: String, amountArtistToken: UFix64){
 
     let sentVault: @FungibleToken.Vault
     let accountAddress : Address  
@@ -33,6 +33,5 @@ transaction (tokenId: String, amountArtistToken:UFix64){
             .borrow<&{FungibleToken.Receiver}>()
             ?? panic("Unable to borrow receiver reference")
         userReceiver.deposit(from: <-burnedTokens)
-
     }
 }

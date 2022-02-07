@@ -17,7 +17,7 @@ func main() {
 	// Register Token for a new account
 	flow.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
 
-	result := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("2.0").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	result := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf("Script returned Social Mint quote %s", result)
 
 }

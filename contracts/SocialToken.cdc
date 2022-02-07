@@ -165,16 +165,16 @@ pub contract SocialToken: FungibleToken {
             tokenId != "" : "token id must not be null"
             Controller.getTokenDetails(tokenId).tokenId !=nil: "token not registered"
         }
+
         let tokenDetails = Controller.getTokenDetails(tokenId)
         let supply = tokenDetails.issuedSupply
         let newSupply = supply + amount
         let reserve = tokenDetails.reserve
         assert(amount + tokenDetails.issuedSupply <= tokenDetails.maxSupply , message: "maximum supply reached")
         if supply == 0.0 {
-            return (tokenDetails.slope.saturatingMultiply((amount.saturatingMultiply(amount)))/2.0/10000.0) 
+            return (tokenDetails.slope.saturatingMultiply((amount.saturatingMultiply(amount/2.0/10000.0))))
         } else {
-            var totalNewSupply = newSupply.saturatingMultiply(newSupply)
-            return (((reserve.saturatingMultiply(totalNewSupply) / supply.saturatingMultiply(supply))) - reserve)
+            return ((reserve.saturatingMultiply(newSupply.saturatingMultiply(newSupply) / supply.saturatingMultiply(supply))) - reserve)
         }
     }  
     pub fun getBurnPrice(_ tokenId: String, _ amount: UFix64): UFix64 {
@@ -215,6 +215,7 @@ pub contract SocialToken: FungibleToken {
         pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
+                fusdPayment.balance > 0.0: "Balance should be greater than zero"
                 Controller.getTokenDetails(tokenId).tokenId !=nil: "toke not registered"
                 amount + Controller.getTokenDetails(tokenId).issuedSupply <= Controller.getTokenDetails(tokenId).maxSupply : "Max supply reached"
                 SocialToken.adminRef.borrow() !=nil: "social token does not have controller capability"
@@ -227,7 +228,7 @@ pub contract SocialToken: FungibleToken {
             var totalPayment = fusdPayment.balance
             assert(totalPayment>=mintPrice, message: "No payment yet")
             let extraAmount = totalPayment-mintPrice
-            if(extraAmount > 0.0){
+            if(extraAmount > 0.0) {
                 //Create Vault of extra amount and deposit back to user
                 totalPayment=totalPayment-extraAmount
                 let remainingAmountVault <- fusdPayment.withdraw(amount: extraAmount)
@@ -240,6 +241,8 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.incrementIssuedSupply(tokenId, amount)
             let remainingAmount <- SocialToken.distributeFee(tokenId, <- fusdPayment)
             SocialToken.totalSupply = SocialToken.totalSupply + amount
+            emit MintedTokenPrice(tokenId, remainingAmount.balance)
+
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             emit TokensMinted(tokenId, mintPrice, amount)

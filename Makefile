@@ -51,3 +51,11 @@ mint-burn-100-tokens:
 .PHONY: get_mint_quote_loop
 get-mint-quote-loop:
 	go run ./tasks/get_mint_quote_loop/main.go
+
+.PHONY: minting_in_loop
+mint-loop:
+	go run ./tasks/minting_in_loop/main.go
+
+.PHONY: burning_in_loop
+burn-loop:
+	go run ./tasks/burning_in_loop/main.go
