@@ -13,10 +13,9 @@ pub contract SocialToken: FungibleToken {
     pub event TokensDeposited(amount: UFix64, to: Address?)
     pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)
     pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64, _ amount: UFix64)
-    pub event MintedTokenPrice(_ tokenId: String, _ mintPrice: UFix64)
-    pub event BurnedTokenPrice(_ tokenId: String, _ mintPrice: UFix64)
+    pub event singleTokenMinted(_ tokenId: String, _ mintPrice: UFix64)
+    pub event singleTokenBurned(_ tokenId: String, _ mintPrice: UFix64)
 
-    
     // a variable that store admin capability to utilize methods of controller contract
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
     // a variable which will store the structure of FUSDPool
@@ -241,12 +240,11 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.incrementIssuedSupply(tokenId, amount)
             let remainingAmount <- SocialToken.distributeFee(tokenId, <- fusdPayment)
             SocialToken.totalSupply = SocialToken.totalSupply + amount
-            emit MintedTokenPrice(tokenId, remainingAmount.balance)
 
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             emit TokensMinted(tokenId, mintPrice, amount)
-            emit MintedTokenPrice(tokenId, mintedTokenPrice)
+            emit singleTokenMinted(tokenId, mintedTokenPrice)
             return <- tempraryVar
         }
     }
@@ -274,7 +272,7 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.decrementIssuedSupply(tokenId, amount)
             SocialToken.adminRef.borrow()!.decrementReserve(tokenId, burnPrice)
             emit TokensBurned(tokenId, burnPrice, amount)
-            emit BurnedTokenPrice(tokenId, burnedTokenPrice)
+            emit singleTokenBurned(tokenId, burnedTokenPrice)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }

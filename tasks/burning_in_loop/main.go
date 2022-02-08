@@ -72,9 +72,13 @@ func main() {
 
 	// burn social Tokens
 	for i := 0; i < 100; i++ {
+		getReserve := flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		log.Printf(" ------ Social Mint Quote burn Reserves %d iteration ----- %s", i, getReserve)
 		BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument("100.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 		log.Printf(" ------ Social Mint Quote burn price %d iteration ----- %s", i, BurnPrice)
 
-		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("1000.00").RunPrintEventsFull()
+		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("100.00").RunPrintEventsFull()
 	}
 }
+
+//39960.74009951

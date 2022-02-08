@@ -63,3 +63,7 @@ mint-loop:
 .PHONY: burning_in_loop
 burn-loop:
 	go run ./tasks/burning_in_loop/main.go
+
+.PHONY: single_burn
+single-burn:
+	go run ./tasks/single_burn/main.go
