@@ -187,10 +187,14 @@ pub contract SocialToken: FungibleToken {
         let supply = tokenDetails.issuedSupply
         assert((supply > 0.0), message: "Token supply is zero")
         assert((supply >= amount), message: "amount greater than supply")
-        let newSupply = supply - amount
-        var _reserve = tokenDetails.reserve
-        let totalNewSupply = newSupply.saturatingMultiply(newSupply)
-        return (_reserve - ((_reserve.saturatingMultiply(totalNewSupply)) / (supply.saturatingMultiply(supply))))
+        let newSupply:UFix64 = UFix64(supply - amount)
+        var testNewSupply: Int64 = Int64(newSupply)
+        var _reserve:Int64 = Int64(tokenDetails.reserve)
+        let totalNewSupply:Int128 = Int128(testNewSupply.saturatingMultiply(testNewSupply))
+        var oldSupply: Int64 = Int64(supply)
+        var data:Int128 = Int128(_reserve - ((_reserve.saturatingMultiply(Int64(totalNewSupply))) / (oldSupply.saturatingMultiply(oldSupply))))
+        var returnReserve = UFix64(data)
+        return (returnReserve)
     }
     
     pub resource interface MinterPublic {

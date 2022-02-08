@@ -63,18 +63,18 @@ func main() {
 	//flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
 
 	mintTokens := "10000000.0"
-
+	
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.0").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 
 	// mint social Tokens
 	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument(mintTokens).UFix64Argument(mintQuote.String()).RunPrintEventsFull()
 	log.Printf(" ------ Social Mint Quote ----- %s", mintQuote)
-
+	
 	// burn social Tokens
 	for i := 0; i < 100; i++ {
-		BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument("100.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument("100000.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 		log.Printf(" ------ Social Mint Quote burn price %d iteration ----- %s", i, BurnPrice)
 
-		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("1000.00").RunPrintEventsFull()
+		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("100000.00").RunPrintEventsFull()
 	}
 }
