@@ -182,19 +182,16 @@ pub contract SocialToken: FungibleToken {
             amount > 0.0: "Amount must be greator than zero"
             Controller.getTokenDetails(tokenId).tokenId !=nil: "token not registered"
         }
+        let decimalPoints: UFix64 = 1000.0
         let tokenDetails = Controller.getTokenDetails(tokenId)
-        assert(tokenDetails.tokenId != "", message:"token id must not be null")
-        let supply = tokenDetails.issuedSupply
-        assert((supply > 0.0), message: "Token supply is zero")
-        assert((supply >= amount), message: "amount greater than supply")
-        let newSupply:UFix64 = UFix64(supply - amount)
-        var testNewSupply: Int64 = Int64(newSupply)
-        var _reserve:Int64 = Int64(tokenDetails.reserve)
-        let totalNewSupply:Int128 = Int128(testNewSupply.saturatingMultiply(testNewSupply))
-        var oldSupply: Int64 = Int64(supply)
-        var data:Int128 = Int128(_reserve - ((_reserve.saturatingMultiply(Int64(totalNewSupply))) / (oldSupply.saturatingMultiply(oldSupply))))
-        var returnReserve = UFix64(data)
-        return (returnReserve)
+        assert(tokenDetails.tokenId != "", message: "token id must not be null")
+        let supply: Int256 = Int256(tokenDetails.issuedSupply)
+        assert((tokenDetails.issuedSupply > 0.0), message: "Token supply is zero")
+        assert((tokenDetails.issuedSupply >= amount), message: "amount greater than supply")
+        let newSupply: Int256 = Int256((tokenDetails.issuedSupply - amount)).saturatingMultiply(Int256(decimalPoints))
+        var _reserve = tokenDetails.reserve
+        var supplyPercentage: UFix64 = UFix64(newSupply.saturatingMultiply(newSupply)/(supply.saturatingMultiply(supply)))/(decimalPoints*decimalPoints)
+        return UFix64(_reserve - (_reserve.saturatingMultiply(supplyPercentage)))
     }
     
     pub resource interface MinterPublic {
