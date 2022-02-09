@@ -37,7 +37,8 @@ register-token:
 mint-burn-instant:
 	go run ./tasks/mint_burn_instant/main.go
 
-.PHONY: transfer-token-different-vaults
+#this should throw an error 
+.PHONY: transfer-token-different-vaults-negative
 transfer-token-different-vaults-negative:
 	go run ./tasks/transfer_token_different_vaults_negative/main.go
 
