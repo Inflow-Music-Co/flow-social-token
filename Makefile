@@ -51,28 +51,29 @@ mint-total-supply:
 .PHONY: mint-burn-100-tokens
 mint-burn-100-tokens:
 	go run ./tasks/mint_burn_100_tokens/main.go
-.PHONY: get_mint_quote_loop
+
+.PHONY: get-mint-quote-loop
 get-mint-quote-loop:
 	go run ./tasks/get_mint_quote_loop/main.go
 
-.PHONY: minting_in_loop
+.PHONY: minting-in-loop
 mint-loop:
 	go run ./tasks/minting_in_loop/main.go
 
-.PHONY: minting_in_loop
+.PHONY: burn-loop
 burn-loop:
 	go run ./tasks/burning_in_loop/main.go
 
-.PHONY: burning_in_loop
+.PHONY: single-mint-burn
 single-mint-burn:
 	go run ./tasks/single_mint_burn/main.go
 
-.PHONY: single_mint_burn
+.PHONY: mint-1000-burn-100-tokens
 mint-1000-burn-100-tokens:
 	go run ./tasks/mint_1000_burn_100_tokens/main.go
 
-.PHONY: mint_1000_burn_100_tokens
-mint-2000-burn-1300_tokens:
+.PHONY: mint-2000-burn-1300-tokens
+mint-2000-burn-1300-tokens:
 	go run ./tasks/mint_2000_burn_1300_tokens/main.go
 
 .PHONY: mint_2000_burn_1300_tokens
