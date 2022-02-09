@@ -46,6 +46,7 @@ transfer-token-different-vaults-negative:
 transfer-token-same-vaults:
 	go run ./tasks/transfer_token_same_vaults/main.go
 
+#mint quote for maximum supply of 10,000,000 should equal 2500000000
 .PHONY: mint-total-supply
 mint-total-supply:
 	go run ./tasks/mint_total_supply/main.go
@@ -54,6 +55,7 @@ mint-total-supply:
 mint-burn-100-tokens:
 	go run ./tasks/mint_burn_100_tokens/main.go
 
+#this is a test to maake sure the mint quote always returns the same value in extreme cases
 .PHONY: get-mint-quote-loop
 get-mint-quote-loop:
 	go run ./tasks/get_mint_quote_loop/main.go
