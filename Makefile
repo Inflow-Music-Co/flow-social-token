@@ -60,7 +60,7 @@ mint-burn-100-tokens:
 get-mint-quote-loop:
 	go run ./tasks/get_mint_quote_loop/main.go
 
-.PHONY: minting-in-loop
+.PHONY: mint-loop
 mint-loop:
 	go run ./tasks/minting_in_loop/main.go
 
