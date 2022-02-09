@@ -1,20 +1,20 @@
 import path from "path"
 import { init, emulator, getAccountAddress, deployContractByName, getContractCode, getContractAddress, getTransactionCode, getScriptCode, executeScript, sendTransaction } from "flow-js-testing";
 
-jest.setTimeout(100000)
+jest.setTimeout(100000);
 
 beforeAll(async () => {
-  const basePath = path.resolve(__dirname, "../../")
-  const port = 8080
+  const basePath = path.resolve(__dirname, "../..");
+  const port = 8080;
 
-  await init(basePath, { port })
-  await emulator.start(port)
-})
+  await init(basePath, { port });
+  await emulator.start(port);
+});
 
 afterAll(async () => {
-  const port = 8080
-  await emulator.stop(port)
-})
+  const port = 8080;
+  await emulator.stop(port);
+});
 
 
 describe("Replicate Playground Accounts", () => {
@@ -189,7 +189,7 @@ describe("Transactions", () => {
       addressMap,
     });
 
-    const args = ["S", 10000.0, Eve];
+    const args = ["S", 10000000.0, Eve];
     let txResult;
     try {
       txResult = await sendTransaction({
@@ -324,7 +324,7 @@ describe("Transactions", () => {
       name,
       addressMap,
     });
-    const args = [500.0, Eve];
+    const args = [2500000000.0, Eve];
 
     // console.log(code);
     let txResult;
@@ -371,6 +371,38 @@ describe("Transactions", () => {
     }
     console.log("tx Result", txResult);
   });
+  test("test script for getting the mint balance of user", async () => {
+    const name = "get_social_mint_quote"
+
+    const FungibleToken = "0xee82856bf20e2aa6"
+    const SocialToken = await getContractAddress("SocialToken")
+
+    const addressMap = {
+      FungibleToken,
+      SocialToken,
+    }
+    const Eve = await getAccountAddress("Eve")
+    const args = [10000000.0, "S_0x45a1763c93006ca"]
+
+    let code = await getScriptCode({
+      name,
+      addressMap,
+    })
+    code = code.toString().replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
+      const accounts = {
+        "0x03": Charlie,
+        "0x04": Dave,
+      };
+      const name = accounts[match];
+      return `getAccount(${name})`;
+    });
+    const result = await executeScript({
+      code,
+      args
+    })
+    console.log(result);
+
+  })
   test("test transaction mint social token for account five symbol S", async () => {
     const name = "mint_social_token";
 
@@ -395,7 +427,78 @@ describe("Transactions", () => {
       name,
       addressMap,
     });
-    const args = ["S_0x45a1763c93006ca", 100.0, 100.0];
+    const args = ["S_0x45a1763c93006ca", 10000000.0, 2500000000.0];
+    let txResult;
+    try {
+      txResult = await sendTransaction({
+        code,
+        signers,
+        args
+      });
+    } catch (e) {
+      console.log(e);
+    }
+    console.log("tx Result", txResult);
+    // expect(txResult[0].errorMessage).toBe("");
+  });
+  test("test script for getting the burn balance of user", async () => {
+    const name = "get_social_burn_quote"
+
+    const FungibleToken = "0xee82856bf20e2aa6"
+    const SocialToken = await getContractAddress("SocialToken")
+
+    const addressMap = {
+      FungibleToken,
+      SocialToken,
+    }
+    const Eve = await getAccountAddress("Eve")
+    const args = [1.0, "S_0x45a1763c93006ca"]
+
+    let code = await getScriptCode({
+      name,
+      addressMap,
+    })
+    code = code.toString().replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
+      const accounts = {
+        "0x03": Charlie,
+        "0x04": Dave,
+      };
+      const name = accounts[match];
+      return `getAccount(${name})`;
+    });
+    const result = await executeScript({
+      code,
+      args
+    })
+    console.log(result);
+
+  })
+
+  test("test transaction burn social token for symbol S", async () => {
+    const name = "burn_social_token";
+
+    // Import participating accounts
+    const Eve = await getAccountAddress("Eve");
+
+
+    // Set transaction signers
+    const signers = [Eve];
+
+    // Generate addressMap from import statements
+    const FungibleToken = "0xee82856bf20e2aa6"
+    const FUSD = await getContractAddress("FUSD");
+    const SocialToken = await getContractAddress("SocialToken")
+
+    const addressMap = {
+      FUSD,
+      FungibleToken,
+      SocialToken,
+    };
+    let code = await getTransactionCode({
+      name,
+      addressMap,
+    });
+    const args = ["S_0x45a1763c93006ca", 100.0];
     let txResult;
     try {
       txResult = await sendTransaction({

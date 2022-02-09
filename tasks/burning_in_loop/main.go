@@ -66,7 +66,7 @@ func main() {
 	//flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
 
 	mintTokens := "10000000.0"
-
+	
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.0").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 
 	// mint social Tokens
@@ -83,7 +83,7 @@ func main() {
     f.SetCellValue("Sheet1", "A1", "Supply")
     f.SetCellValue("Sheet1", "B1", "Reserve")
     f.SetCellValue("Sheet1", "C1", "User_balance")
-	f.SetCellValue("Sheet1", "D", "Burn_token")
+	f.SetCellValue("Sheet1", "D1", "Burn_token")
     f.SetCellValue("Sheet1", "E1", "Total_token_burn_Price")
     f.SetCellValue("Sheet1", "F1", "Single_token_burn_price")
 	f.SetCellValue("Sheet1", "G1", "current_Time")
@@ -95,6 +95,9 @@ func main() {
 	for i := 0; i < 100; i++ {
 		BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument(burnTokens).StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 		log.Printf(" ------ Social Mint Quote burn price %d iteration ----- %s", i, BurnPrice)
+		
+		Reserve1 := flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		log.Printf(" ------ Social burn reserve before %d  iteration ----- %s", i, Reserve1)
 
 		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument(burnTokens).RunPrintEventsFull()
 		

@@ -13,8 +13,8 @@ pub contract SocialToken: FungibleToken {
     pub event TokensDeposited(amount: UFix64, to: Address?)
     pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)
     pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64, _ amount: UFix64)
-    pub event MintedTokenPrice(_ tokenId: String, _ mintPrice: UFix64)
-    pub event BurnedTokenPrice(_ tokenId: String, _ mintPrice: UFix64)
+    pub event SingleTokenMinted(_ tokenId: String, _ mintPrice: UFix64)
+    pub event SingleTokenBurned(_ tokenId: String, _ burnPrice: UFix64)
 
     
     // a variable that store admin capability to utilize methods of controller contract
@@ -242,12 +242,11 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.incrementIssuedSupply(tokenId, amount)
             let remainingAmount <- SocialToken.distributeFee(tokenId, <- fusdPayment)
             SocialToken.totalSupply = SocialToken.totalSupply + amount
-            emit MintedTokenPrice(tokenId, remainingAmount.balance)
-
+            
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             emit TokensMinted(tokenId, mintPrice, amount)
-            emit MintedTokenPrice(tokenId, mintedTokenPrice)
+            emit SingleTokenMinted(tokenId, mintedTokenPrice)
             return <- tempraryVar
         }
     }
@@ -275,7 +274,7 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.decrementIssuedSupply(tokenId, amount)
             SocialToken.adminRef.borrow()!.decrementReserve(tokenId, burnPrice)
             emit TokensBurned(tokenId, burnPrice, amount)
-            emit BurnedTokenPrice(tokenId, burnedTokenPrice)
+            emit SingleTokenBurned(tokenId, burnedTokenPrice)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }
