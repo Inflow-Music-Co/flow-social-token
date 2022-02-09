@@ -74,7 +74,7 @@ pub contract Controller {
         pub fun decrementReserve(_ newReserve: UFix64){
             pre {
                 newReserve != nil: "reserve must not be null"
-                newReserve >= 0.0 : "reserve must be greater than zero"
+                newReserve > 0.0 : "reserve must be greater than zero"
             }
             self.reserve = self.reserve - newReserve
             emit decrementReserve(newReserve)
@@ -195,7 +195,7 @@ pub contract Controller {
         
             pre {
                 newReserve != nil: "reserve must not be null"
-                newReserve >= 0.0: "reserve must be greater than zero"
+                newReserve > 0.0: "reserve must be greater than zero"
                 
             }
             Controller.allSocialTokens[tokenId]!.decrementReserve(newReserve)
