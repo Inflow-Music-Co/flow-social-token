@@ -7,7 +7,7 @@ story:
 event:
 	go run ./event/main.go
 
-#this goal mints new flow tokens on emulator takes an account(Addres) env and can take an amount(int:100) env
+#this gets the mint quote for the total supply 10,000,000
 .PHONY:mint-quote
 mint-quote:
 	go run ./tasks/get_mint_quote/main.go
@@ -16,6 +16,7 @@ mint-quote:
 mint-fusd:
 	go run ./tasks/mint_fusd/main.go
 
+#mint 100 social tokens and deposit fusd collateral
 .PHONY: mint-with-collateral
 mint-with-collateral:
 	go run ./tasks/mint_with_collateral/main.go

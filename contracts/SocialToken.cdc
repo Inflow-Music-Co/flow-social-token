@@ -245,7 +245,7 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             emit TokensMinted(tokenId, mintPrice, amount)
-            emit SingleTokenPrice(tokenId, mintedTokenPrice)
+            emit SingleTokenMintPrice(tokenId, mintedTokenPrice)
             return <- tempraryVar
         }
     }
