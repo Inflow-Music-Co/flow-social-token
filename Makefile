@@ -80,7 +80,6 @@ mint-1000-burn-100-tokens:
 mint-2000-burn-1300-tokens:
 	go run ./tasks/mint_2000_burn_1300_tokens/main.go
 
-.PHONY: mint_2000_burn_1300_tokens
+.PHONY: mint-5000-burn-3500-tokens
 mint-5000-burn-3500-tokens:
 	go run ./tasks/mint_5000_burn_3500_tokens/main.go
-.PHONY: mint_5000_burn_3500_tokens
