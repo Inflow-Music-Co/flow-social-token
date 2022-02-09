@@ -13,8 +13,8 @@ pub contract SocialToken: FungibleToken {
     pub event TokensDeposited(amount: UFix64, to: Address?)
     pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)
     pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64, _ amount: UFix64)
-    pub event singleTokenMinted(_ tokenId: String, _ mintPrice: UFix64)
-    pub event singleTokenBurned(_ tokenId: String, _ mintPrice: UFix64)
+    pub event SingleTokenMinted(_ tokenId: String, _ mintPrice: UFix64)
+    pub event SingleTokenBurned(_ tokenId: String, _ burnPrice: UFix64)
 
     // a variable that store admin capability to utilize methods of controller contract
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
@@ -181,15 +181,16 @@ pub contract SocialToken: FungibleToken {
             amount > 0.0: "Amount must be greator than zero"
             Controller.getTokenDetails(tokenId).tokenId !=nil: "token not registered"
         }
+        let decimalPoints: UFix64 = 1000.0
         let tokenDetails = Controller.getTokenDetails(tokenId)
-        assert(tokenDetails.tokenId != "", message:"token id must not be null")
-        let supply = tokenDetails.issuedSupply
-        assert((supply > 0.0), message: "Token supply is zero")
-        assert((supply >= amount), message: "amount greater than supply")
-        let newSupply = supply - amount
+        assert(tokenDetails.tokenId != "", message: "token id must not be null")
+        let supply: Int256 = Int256(tokenDetails.issuedSupply)
+        assert((tokenDetails.issuedSupply > 0.0), message: "Token supply is zero")
+        assert((tokenDetails.issuedSupply >= amount), message: "amount greater than supply")
+        let newSupply: Int256 = Int256((tokenDetails.issuedSupply - amount)).saturatingMultiply(Int256(decimalPoints))
         var _reserve = tokenDetails.reserve
-        let totalNewSupply = newSupply.saturatingMultiply(newSupply)
-        return (_reserve - ((_reserve.saturatingMultiply(totalNewSupply)) / (supply.saturatingMultiply(supply))))
+        var supplyPercentage: UFix64 = UFix64(newSupply.saturatingMultiply(newSupply)/(supply.saturatingMultiply(supply)))/(decimalPoints*decimalPoints)
+        return UFix64(_reserve - (_reserve.saturatingMultiply(supplyPercentage)))
     }
     
     pub resource interface MinterPublic {
@@ -240,11 +241,11 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.incrementIssuedSupply(tokenId, amount)
             let remainingAmount <- SocialToken.distributeFee(tokenId, <- fusdPayment)
             SocialToken.totalSupply = SocialToken.totalSupply + amount
-
+            
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
             SocialToken.collateralPool.receiver.borrow()!.deposit(from:<- remainingAmount)
             emit TokensMinted(tokenId, mintPrice, amount)
-            emit singleTokenMinted(tokenId, mintedTokenPrice)
+            emit SingleTokenMinted(tokenId, mintedTokenPrice)
             return <- tempraryVar
         }
     }
@@ -272,7 +273,7 @@ pub contract SocialToken: FungibleToken {
             SocialToken.adminRef.borrow()!.decrementIssuedSupply(tokenId, amount)
             SocialToken.adminRef.borrow()!.decrementReserve(tokenId, burnPrice)
             emit TokensBurned(tokenId, burnPrice, amount)
-            emit singleTokenBurned(tokenId, burnedTokenPrice)
+            emit SingleTokenBurned(tokenId, burnedTokenPrice)
             destroy vault
             return <- SocialToken.collateralPool.provider.borrow()!.withdraw(amount:burnPrice)
         }

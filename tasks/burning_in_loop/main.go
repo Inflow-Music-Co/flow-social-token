@@ -2,7 +2,10 @@ package main
 
 import (
 	"log"
+	"strconv"
+	"time"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/bjartek/go-with-the-flow/v2/gwtf"
 )
 
@@ -63,22 +66,74 @@ func main() {
 	//flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
 
 	mintTokens := "10000000.0"
-
+	
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.0").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 
 	// mint social Tokens
 	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument(mintTokens).UFix64Argument(mintQuote.String()).RunPrintEventsFull()
 	log.Printf(" ------ Social Mint Quote ----- %s", mintQuote)
 
+	//reserve before burning social tokens
+	reserve := flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ reserve before buring social tokens----- %s", reserve)
+
+	//create new file
+	f := excelize.NewFile()
+	//set column names
+    f.SetCellValue("Sheet1", "A1", "Supply")
+    f.SetCellValue("Sheet1", "B1", "Reserve")
+    f.SetCellValue("Sheet1", "C1", "User_balance")
+	f.SetCellValue("Sheet1", "D1", "Burn_token")
+    f.SetCellValue("Sheet1", "E1", "Total_token_burn_Price")
+    f.SetCellValue("Sheet1", "F1", "Single_token_burn_price")
+	f.SetCellValue("Sheet1", "G1", "current_Time")
+
 	// burn social Tokens
+	j :=2
+	burnTokens := "100000.00" 
+
 	for i := 0; i < 100; i++ {
-		getReserve := flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
-		log.Printf(" ------ Social Mint Quote burn Reserves %d iteration ----- %s", i, getReserve)
-		BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument("100.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		BurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument(burnTokens).StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 		log.Printf(" ------ Social Mint Quote burn price %d iteration ----- %s", i, BurnPrice)
+		
+		Reserve1 := flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		log.Printf(" ------ Social burn reserve before %d  iteration ----- %s", i, Reserve1)
 
-		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("100.00").RunPrintEventsFull()
+		flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument(burnTokens).RunPrintEventsFull()
+		
+		//reserve after burning social tokens
+		reserve = flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		log.Printf(" ------ reserve after buring social tokens----- %s", reserve)
+
+		//total after burning social tokens
+		supply := flow.ScriptFromFile("get_issued_supply").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+		log.Printf(" ------ reserve after buring social tokens----- %s", supply)
+		
+		//Log balance
+		fusdSecondAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
+		log.Printf("FUSD balance of account 'first account' %s", fusdSecondAccountBalance)
+		
+		j +=1
+		k := strconv.Itoa(j)
+		now := time.Now()
+
+		if i== 99 {
+			f.SetCellValue("Sheet1", "F" + k, 0)
+		}else{
+			SingleBurnPrice := flow.ScriptFromFile("get_social_burn_quote").UFix64Argument("1.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+			log.Printf(" ------ Social Mint Quote burn price %d iteration ----- %s", i, SingleBurnPrice)
+			f.SetCellValue("Sheet1", "F" + k, SingleBurnPrice)
+		}
+		
+		f.SetCellValue("Sheet1", "A" + k, supply)
+		f.SetCellValue("Sheet1", "B" + k, reserve)
+		f.SetCellValue("Sheet1", "C" + k, fusdSecondAccountBalance)
+		f.SetCellValue("Sheet1", "D" + k, burnTokens)
+		f.SetCellValue("Sheet1", "E" + k, BurnPrice)
+		f.SetCellValue("Sheet1", "G" + k, now.Format(time.ANSIC))
+
 	}
+    if err := f.SaveAs("bondingCurve.xlsx"); err != nil {
+        log.Fatal(err)
+    }
 }
-
-//39960.74009951

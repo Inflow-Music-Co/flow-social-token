@@ -74,9 +74,16 @@ func main() {
 
 	log.Printf(" ------ Social Mint Quote S ----- %s", mintQuote)
 
+	//reserve after buring social tokens
+	reserve := flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ reserve before buring social tokens TestSymbol_0x1cf0e2f2f715450----- %s", reserve)
+
 	// burn social Tokens
 	flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("100.00000000").RunPrintEventsFull()
 
+	//reserve after buring social tokens
+	reserve = flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
+	log.Printf(" ------ reserve after buring social tokens TestSymbol_0x1cf0e2f2f715450----- %s", reserve)
 	//-------------------------------------------------//
 	//--------- Register Account -----------//
 	//-------------------------------------------------//
@@ -97,8 +104,17 @@ func main() {
 	// mint tokens
 	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("first").StringArgument("N_0x179b6b1cb6755e31").UFix64Argument("100.00").UFix64Argument("100.00").RunPrintEventsFull()
 
+	//reserve after buring social tokens
+	reserve = flow.ScriptFromFile("get_reserve").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
+	log.Printf(" ------ reserve before buring social tokens N_0x179b6b1cb6755e31----- %s", reserve)
+
+
 	// burn social Tokens
 	flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("first").StringArgument("N_0x179b6b1cb6755e31").UFix64Argument("100.00000000").RunPrintEventsFull()
+
+	//reserve after buring social tokens
+	reserve = flow.ScriptFromFile("get_reserve").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
+	log.Printf(" ------ reserve after buring social tokens N_0x179b6b1cb6755e31----- %s", reserve)
 
 	UserSocialBalance = flow.ScriptFromFile("get_social_balance").AccountArgument("first").StringArgument("N_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ User Social Token Balance of first account ----- %s", UserSocialBalance)
