@@ -33,6 +33,10 @@ get-social-details:
 register-token:
 	go run ./tasks/register_token/main.go
 
+.PHONY: register-multiple-tokens
+register-multiple-tokens:
+	go run ./tasks/register_multiple_tokens/main.go
+
 .PHONY: mint-burn-instant
 mint-burn-instant:
 	go run ./tasks/mint_burn_instant/main.go
