@@ -56,12 +56,11 @@ func main() {
 	flow.TransactionFromFile("add_admin_account").SignProposeAndPayAs("account").AccountArgument("account").RunPrintEventsFull()
 
 	//--------------------------------------------------//
-	//--------- SETUP AND MINT SOCIAL TOKEN ------------//
+	//--------- SETUP AND GET PRICE SOCIAL TOKEN -------//
 	//--------------------------------------------------//
 
 	//Setup SocialToken Vaults for both accounts
 	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunPrintEventsFull()
-	//flow.TransactionFromFile("social_token/setup_social_vault").SignProposeAndPayAs("account").RunPrintEventsFull()
 
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 	
