@@ -31,7 +31,7 @@ func main() {
 	flow.TransactionFromFile("setup_fusd_minter").SignProposeAndPayAs("first").RunPrintEventsFull()
 
 	//Admin Account deposits minter into first account
-	flow.TransactionFromFile("set_minter_proxy").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	// First Account Mints and deposits in one transaction
 	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("100.00").AccountArgument("first").RunPrintEventsFull()
