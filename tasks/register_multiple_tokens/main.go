@@ -59,18 +59,26 @@ func main() {
 	flow.TransactionFromFile("setup_social_minter").SignProposeAndPayAs("account").AccountArgument("first").RunPrintEventsFull()
 
 	// First Account Mints and deposits in one transaction
-	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("10000000.00").AccountArgument("second").RunPrintEventsFull()
+	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("10000000.00").AccountArgument("account").RunPrintEventsFull()
 
-	//Setup SocialToken Vaults for both accounts
-	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("second").StringArgument("S_0x1cf0e2f2f715450").RunPrintEventsFull()
+	//Setup SocialToken Vaults for accounts
+	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("account").StringArgument("S_0x1cf0e2f2f715450").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("account").StringArgument("X_0x179b6b1cb6755e31").RunPrintEventsFull()
+	flow.TransactionFromFile("setup_social_vault").SignProposeAndPayAs("account").StringArgument("STRANGE_0xf3fcd2c1a78f5eee").RunPrintEventsFull()
 
 	mintQuoteFirst := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("111.00").StringArgument("S_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf(" ------ mintQuote for S is ----- %s", mintQuoteFirst)
 
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("account").StringArgument("S_0x1cf0e2f2f715450").UFix64Argument("100.00").UFix64Argument(mintQuoteFirst.String()).RunPrintEventsFull()
+
 	mintQuoteSecond := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("222.00").StringArgument("X_0x179b6b1cb6755e31").RunFailOnError()
 	log.Printf(" ------ mintQuote is for X is ----- %s", mintQuoteSecond)
 
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("account").StringArgument("X_0x179b6b1cb6755e31").UFix64Argument("222.00").UFix64Argument(mintQuoteSecond.String()).RunPrintEventsFull()
+
 	mintQuoteThird := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("333.00").StringArgument("STRANGE_0xf3fcd2c1a78f5eee").RunFailOnError()
 	log.Printf(" ------ mintQuote is for X is ----- %s", mintQuoteThird)
+
+	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("account").StringArgument("STRANGE_0xf3fcd2c1a78f5eee").UFix64Argument("333.00").UFix64Argument(mintQuoteThird.String()).RunPrintEventsFull()
 
 }
