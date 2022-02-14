@@ -9,5 +9,5 @@ of the smart contracts.
 # Commands to Run test Cases
 
 - go to test/js directory and run "npm i" command
-- Start Local Emulator(flow init and flow start)
+- Start Local Emulator(flow init and flow emulator)
 - To check all the details run "npm test" command

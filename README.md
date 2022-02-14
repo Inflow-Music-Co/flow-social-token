@@ -1,8 +1,76 @@
-[![Coverage Status](https://coveralls.io/repos/github/bjartek/go-with-the-flow/badge.svg?branch=main)](https://coveralls.io/github/bjartek/go-with-the-flow?branch=main) [![ci](https://github.com/bjartek/go-with-the-flow/actions/workflows/test.yml/badge.svg)](https://github.com/bjartek/go-with-the-flow/actions/workflows/test.yml)
+# Inflow Social Token 
 
-# The Social Token for Flow 
+## Introduction 
+
+This repository contains the smart contracts and transactions that implement
+the core functionality of the Inflow Social Token Platform.
+
+The smart contracts are written in Cadence, a new resource oriented
+smart contract programming language designed for the Flow Blockchain.
+
+### What is Inflow Music
+Inflow Music is a platform where fans can buy social tokens of their favourite musical artists. 
+Fans collect, buy and sell these social tokens, which give them access to exclusive artist content,
+experiences, private live streams and more. These social tokens are fungible tokens, not NFTs.
+
+### What is Flow?
+
+Flow is a new blockchain for open worlds. Read more about it [here](https://www.onflow.org/).
+
+### What is Cadence?
+
+Cadence is a new Resource-oriented programming language 
+for developing smart contracts for the Flow Blockchain.
+Read more about it [here](https://www.docs.onflow.org)
+
+We recommend that anyone who is reading this should have already
+completed the [Cadence Tutorials](https://docs.onflow.org/cadence) 
+so they can build a basic understanding of the programming language.
+
+Resource-oriented programming, and by extension Cadence, 
+is the perfect programming environment for Non-Fungible Tokens (NFTs), because users are able
+to store their NFT objects directly in their accounts and transact
+peer-to-peer. Please see the [blog post about resources](https://medium.com/dapperlabs/resource-oriented-programming-bee4d69c8f8e)
+to understand why they are perfect for digital assets like NBA Top Shot Moments.
+
+### Contributing
+
+If you see an issue with the code for the contracts, the transactions, scripts,
+documentation, or anything else, please do not hesitate to make an issue or
+a pull request with your desired changes. This is an open source project
+and we welcome all assistance from the community!
+
+## Fungible Token Standard
+The Social Token contract utilizes [Flow Fungible Token Standard](https://github.com/onflow/flow-ft)
+which is equivalent to ERC20 in Solidity. 
+
+### Social Token Contract 
+The Social Token uses the Fungible Token interface and functionality but extends it with additional functions. These functions allow any users to mint or burn the social tokens, increasing or decreasing the circulating supply, stores some data in a struct about the Social Token, allows it to accept and deposit fUSD Vaults to users minting and burning and allows it to be maintained by the Controller contract. 
+
+The Social Token is simply a fungible token at its core, free to be exchanged, traded and utlizied on the public Flow Network. 
+
+### Controller Contract 
+The Controller contract contains functions that are mostly acceseible only by the admin. These functions allow the admin to mint new Social Tokens, keep track of data related to all the Social Tokens and individual Social Tokens, give capabailities to users and set the FeeStructure, which determines the fee split percentages when a user mints new Socal Tokens. 
+
+## Directory Structure
+
+The directoties here are organised into, contracts, scripts, transactions, unit tests and taskss. 
+
+- `contracts/` Contracts contain the source code for the Inflow Social Token contracts that are deployed to Flow. 
+
+- `scripts/` Scripts contain read-only transactions to get information about the state of a particlar Social Token or a users balance of those Social Tokens. 
+
+- `transactions/` Transactions contain the transactions that admins and users can use to perform actions in the smart contract like minting, burning, registering tokens and transferring tokens. 
+
+- `tasks/` Tasks are written in Golang and use the go-with-the-flow testing and development environment for Flow. The Tasks run various scenarios and intergration tests relating to possible and common user-stories when interacting with the contracts.
+
+N.B -`test/` Since this repository was completed a later version of go-with-the-flow has been published called overflow. This is recommended for newer projects. For more information on setting up this project in go-with-the-flow please read the section below. 
+
+Unit tests are written in javascript and they can be ran by following the `README.md` inside `test/js`
 
 This project is bootstrapped with Go With The Flow, for easier testing and development. 
+
+[![Coverage Status](https://coveralls.io/repos/github/bjartek/go-with-the-flow/badge.svg?branch=main)](https://coveralls.io/github/bjartek/go-with-the-flow?branch=main) [![ci](https://github.com/bjartek/go-with-the-flow/actions/workflows/test.yml/badge.svg)](https://github.com/bjartek/go-with-the-flow/actions/workflows/test.yml)
 
 # Go with the Flow
 
@@ -56,6 +124,30 @@ The emulator will be run in memory.
 ## Credits
 
 This project is a rewrite of https://github.com/versus-flow/go-flow-tooling 
+
+## Inflow Social Token Overview
+
+Each Social Token registered through the controller contract by an admin must be initialised with the following data 
+
+```cadence
+ pub struct TokenStructure {
+        pub var tokenId: String
+        pub var symbol: String
+        pub var issuedSupply: UFix64
+        pub var maxSupply: UFix64
+        pub var artist: Address
+        pub var slope: UFix64
+        pub var feeSplitterDetail: {Address: FeeStructure}
+        pub var reserve: UFix64
+        pub var tokenResourceStoragePath: StoragePath
+        pub var tokenResourcePublicPath: PublicPath
+        pub var socialMinterStoragePath: StoragePath
+        pub var socialMinterPublicPath: PublicPath
+        pub var socialBurnerStoragePath: StoragePath
+        pub var socialBurnerPublicPath: PublicPat
+ }
+
+```
 
 
 
