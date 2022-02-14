@@ -26,7 +26,7 @@ pub contract Controller {
     pub let SocialTokenResourcePrivatePath: PrivatePath
 
     // A structure that contains all the data related to the Token 
-    pub struct TokenStructure {
+pub struct TokenStructure {
         pub var tokenId: String
         pub var symbol: String
         pub var issuedSupply: UFix64

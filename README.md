@@ -64,9 +64,9 @@ The directoties here are organised into, contracts, scripts, transactions, unit 
 
 - `tasks/` Tasks are written in Golang and use the go-with-the-flow testing and development environment for Flow. The Tasks run various scenarios and intergration tests relating to possible and common user-stories when interacting with the contracts.
 
-N.B -`test/` Since this repository was completed a later version of go-with-the-flow has been published called overflow. This is recommended for newer projects. For more information on setting up this project in go-with-the-flow please read the section below. 
+ -`test/` Unit tests are written in javascript and they can be ran by following the `README.md` inside `test/js`
 
-Unit tests are written in javascript and they can be ran by following the `README.md` inside `test/js`
+N.B Since this repository was completed a later version of go-with-the-flow has been published called overflow. This is recommended for newer projects. For more information on setting up this project in go-with-the-flow please read the section below. 
 
 This project is bootstrapped with Go With The Flow, for easier testing and development. 
 
@@ -149,5 +149,30 @@ Each Social Token registered through the controller contract by an admin must be
 
 ```
 
+Once a Social Token has been registered, a new Social Token has been created and can be minted or burned by users with that capability to increment or decrement its supply. 
+
+If a user wants to mint new tokens the transaction code calls `getMintPrice(_ tokenId: String, _ amount: UFix64)`. This function returns the quote or the cost to mint new social tokens based on the reserve and criculating supply. It uses a bonding curve formula to calculate the price. 
+
+The bonding curve we are using is based on Bancor's [Bonding Curve Token](https://billyrennekamp.medium.com/converting-between-bancor-and-bonding-curve-price-formulas-9c11309062f5)  
+
+This creates a Dynamic Bonding Curve that reacts to supply and demand by using a constant called Conector Weight, which can be calculated like so: 
+
+`CW = collateral / marketCap`
+
+Furthermore: 
+
+```
+marketCap = price * tokenSupply
+price = collateral / (tokenSupply * CW)
+```
+
+The following functions can be used to calculate the returns when buying and selling tokens:
+```
+buyAmt = tokenSupply * ((1 + amtPaid / collateral)^CW — 1)
+sellAmt = collateral * ((1 + tokensSold / totalSupply)^(1/CW) — 1)
+```
+
+To quote the 2018 article by Billy Rennekamp linked above 
+_'The interesting part of this method is that while the CW defines a family of curves, it does not define the exact slope of that curve. Instead, the values for tokenSupply and collateral ultimately effect the slope. This makes it possible to have a dynamic price curve that adjusts to inflation and deflation of a token.'_
 
 
