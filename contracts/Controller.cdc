@@ -7,7 +7,7 @@ pub contract Controller {
     // Events
     // Emitted when a Reserve is incremented while minting social tokens
     pub event incrementReserve(_ newReserve:UFix64)
-    // Emitted when a Reserve is decremented while minting social tokens
+    // Emitted when a Reserve is decremented while burning social tokens
     pub event decrementReserve(_ newReserve:UFix64)
     // Emitted when a IssuedSupply is incremented after minting social tokens
     pub event incrementIssuedSupply(_ amount: UFix64)

@@ -149,7 +149,7 @@ Each Social Token registered through the controller contract by an admin must be
 
 ```
 
-Once a Social Token has been registered, a new Social Token has been created and can be minted or burned by users with that capability to increment or decrement its supply. 
+Once a Social Token has been registered, a new Social Token has been created and can be minted or burned by users with that capability to increment or decrement its supply. Tokens can be minted by users depositing FUSD into a collateral pool, which increases the `reserve` value. Tokens can be burned where FUSD from the collateral pool is returned to the user for a profit or loss and decreases the `reserve` value. 
 
 If a user wants to mint new tokens the transaction code calls `getMintPrice(_ tokenId: String, _ amount: UFix64)`. This function returns the quote or the cost to mint new social tokens based on the reserve and criculating supply. It uses a bonding curve formula to calculate the price. 
 
@@ -171,8 +171,70 @@ The following functions can be used to calculate the returns when buying and sel
 buyAmt = tokenSupply * ((1 + amtPaid / collateral)^CW — 1)
 sellAmt = collateral * ((1 + tokensSold / totalSupply)^(1/CW) — 1)
 ```
-
 To quote the 2018 article by Billy Rennekamp linked above 
 _'The interesting part of this method is that while the CW defines a family of curves, it does not define the exact slope of that curve. Instead, the values for tokenSupply and collateral ultimately effect the slope. This makes it possible to have a dynamic price curve that adjusts to inflation and deflation of a token.'_
+
+## Social Token Events 
+The smart contract and its various resources will emit certain events that show when specific actions are taken, like minting or burning a Social Token. This is a list of events that can be emitted and what each event means. 
+
+ - `pub event TokensInitialized(initialSupply: UFix64)`
+    
+    This event is emitted when new Social Tokens are registered
+
+
+ - `pub event TokensWithdrawn(amount: UFix64, from: Address?)`
+    
+    This event is emitted when Social Tokens are withdrawn from a user's wallet
+
+ - `pub event TokensDeposited(amount: UFix64, to: Address?)` 
+    
+    This event is emitted Social Tokens are deposited to a user's wallet. 
+
+ - `pub event TokensMinted(_ tokenId: String, _ mintPrice: UFix64, _ amount: UFix64)`
+
+    This event is emitted when Social Tokens are minted, it also emits the mintPrice for the amount minted.
+
+ - `pub event TokensBurned(_ tokenId: String, _ burnPrice: UFix64, _ amount: UFix64)`
+    
+    This event is emitted when Social Tokens are burned, it also emits the burnPrice for the amount burned. 
+
+-  `pub event SingleTokenMintPrice(_ tokenId: String, _ mintPrice: UFix64)`
+
+    This event is emitted when Social Tokens are minted, but it emits the price of a single token in all cases. This means it is always easy to index the price of a single social token. 
+
+-   `pub event SingleTokenBurnPrice(_ tokenId: String, _ burnPrice: UFix64)`
+
+    This event is emitted when Social Tokens are burned, it emits the price of a single burned token in all cases. 
+
+## Controller Events
+
+- `pub event incrementReserve(_ newReserve:UFix64)`
+
+    This event is emitted when a token's FUSD reserve is incremented
+
+- `pub event decrementReserve(_ newReserve:UFix64)`
+
+    This event is emitted when a token's FUSD reserce decremented 
+
+- `pub event incrementIssuedSupply(_ amount: UFix64)`
+
+    This event is emitted when the Issued Supply, which is set when registered a token is incremented by admin (rare cases).
+
+- `pub event decrementIssuedSupply(_ amount: UFix64)`
+
+    This event is emitted when the Issued Supply is decremented by admin (rare cases).
+
+- `pub event pub event registerToken(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address)` 
+
+    This event is emitted with a new Social Token is registered by the admin. 
+
+- `pub event updatePercentage(_ percentage: UFix64)`
+    
+    This event is emitted when the feeSplitter for a social token is updated. 
+
+The works in this repository are under the Unlicence
+
+
+
 
 
