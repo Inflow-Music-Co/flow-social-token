@@ -121,10 +121,6 @@ make <taskName>
 In order to run the demo example you only have to run `make` in the example folder of this project
 The emulator will be run in memory. 
 
-## Credits
-
-This project is a rewrite of https://github.com/versus-flow/go-flow-tooling 
-
 ## Inflow Social Token Overview
 
 Each Social Token registered through the controller contract by an admin must be initialised with the following data 
