@@ -66,6 +66,10 @@
 		"emulator-5": {
 			"address": "045a1763c93006ca",
 			"key": "d5457a187e9642a8e49d4032b3b4f85c92da7202c79681d9302c6e444e7033a8"
+		},
+		"my-testnet-account": {
+			"address": "0xfbdf4d03c25de1ac",
+			"key": "319851fe99ea7a73382344dde491d783cd589200a04308ac36feaa2af8178e98"
 		}
 	},
 	"deployments": {
@@ -78,6 +82,9 @@
 			],
 			"emulator-first": [],
 			"emulator-second": []
-		}
+		},
+		"testnet": {
+			"my-testnet-account" : ["Controller", "SocialToken"]
+		}	
 	}
 }

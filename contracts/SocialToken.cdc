@@ -1,6 +1,6 @@
-import FungibleToken from 0xee82856bf20e2aa6
-import Controller from 0xf8d6e0586b0a20c7
-import FUSD from 0xf8d6e0586b0a20c7
+import FungibleToken from 0x9a0766d93b6608b7
+import Controller from 0xfbdf4d03c25de1ac
+import FUSD from 0xe223d8a629e49c68
 
 pub contract SocialToken: FungibleToken {
 
