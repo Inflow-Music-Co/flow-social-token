@@ -231,7 +231,7 @@ The smart contract and its various resources will emit certain events that show 
 The works in this repository are under the Unlicence
 
 # deployments
-Both contracts are deployed to the testnet address ``0x68b2f4c310f8716c``
+Both contracts are deployed to the testnet address ``0x35a9222cca31c019``
 
 
 
