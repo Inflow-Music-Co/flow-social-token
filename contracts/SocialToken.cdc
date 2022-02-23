@@ -1,6 +1,6 @@
 import FungibleToken from 0xee82856bf20e2aa6
 import Controller from 0xf8d6e0586b0a20c7
-import FUSD from 0xf8d6e0586b0a20c7
+import FiatToken from 0xf8d6e0586b0a20c7
 
 pub contract SocialToken: FungibleToken {
 
@@ -18,8 +18,8 @@ pub contract SocialToken: FungibleToken {
 
     // a variable that store admin capability to utilize methods of controller contract
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
-    // a variable which will store the structure of FUSDPool
-    pub var collateralPool: FUSDPool
+    // a variable which will store the structure of USDCPool
+    pub var collateralPool: USDCPool
 
     pub resource interface SocialTokenPublic {
         pub fun getTokenId(): String 
@@ -126,37 +126,41 @@ pub contract SocialToken: FungibleToken {
         return <- create Burner()
     }
 
-    // A structure that contains all the data related to the FUSDPool
-    pub struct FUSDPool {
+    // A structure that contains all the data related to the USDCPool
+    pub struct USDCPool {
         pub let receiver: Capability<&{FungibleToken.Receiver}>
         pub let provider: Capability<&{FungibleToken.Provider}>
         pub let balance : Capability<&{FungibleToken.Balance}>
+        pub let resourceId : Capability<&FiatToken.Vault{FiatToken.ResourceId}>
 
         init(
             _receiver: Capability<&{FungibleToken.Receiver}>, 
             _provider: Capability<&{FungibleToken.Provider}>,
-            _balance : Capability<&{FungibleToken.Balance}>
+            _balance : Capability<&{FungibleToken.Balance}>,
+            _resourceId : Capability<&FiatToken.Vault{FiatToken.ResourceId}>
+           
             ) {
             self.receiver = _receiver
             self.provider = _provider
             self.balance = _balance
+            self.resourceId = _resourceId
         }
     }
     // method to distribute fee of a token when a token minted, distribute to admin and artist
-    access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
-        let amount = fusdPayment.balance
+    access(contract) fun distributeFee(_ tokenId : String, _ usdcPayment: @FungibleToken.Vault): @FungibleToken.Vault {
+        let amount = usdcPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
         for address in tokenDetails.feeSplitterDetail.keys {
             let feeStructer = tokenDetails.feeSplitterDetail[address]
             let tempAmmount = amount * feeStructer!.percentage
-            let tempraryVault <- fusdPayment.withdraw(amount:tempAmmount)
+            let tempraryVault <- usdcPayment.withdraw(amount:tempAmmount)
             let account = getAccount(address)
-            let depositSigner= account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
+            let depositSigner= account.getCapability<&FiatToken.Vault{FungibleToken.Receiver}>(FiatToken.VaultReceiverPubPath)
             .borrow()
             ??panic("could not borrow reference to the receiver")
             depositSigner.deposit(from:<- tempraryVault)
         }
-        return <- fusdPayment
+        return <- usdcPayment
     }
     pub fun getMintPrice(_ tokenId: String, _ amount: UFix64): UFix64 {
         pre { 
@@ -194,7 +198,7 @@ pub contract SocialToken: FungibleToken {
     }
     
     pub resource interface MinterPublic {
-        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault
+        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, usdcPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault
     }
 
     pub resource Minter: MinterPublic {
@@ -203,7 +207,7 @@ pub contract SocialToken: FungibleToken {
         // Parameters:
         // tokenId: The ID of the token that will be minted
         // amount: amount to pay for the tokens
-        // fusdPayment: will take the fusd balance
+        // usdcPayment: will take the usdc balance
         // receiverVault: will return the remaining balance to the user
         // Pre-Conditions:
         // tokenId must not be null
@@ -212,26 +216,26 @@ pub contract SocialToken: FungibleToken {
         // 
         // Returns: The SocialToken Vault
         // 
-        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, fusdPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault {
+        pub fun mintTokens(_ tokenId: String, _ amount: UFix64, usdcPayment: @FungibleToken.Vault, receiverVault: Capability<&AnyResource{FungibleToken.Receiver}>): @SocialToken.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
-                fusdPayment.balance > 0.0: "Balance should be greater than zero"
+                usdcPayment.balance > 0.0: "Balance should be greater than zero"
                 Controller.getTokenDetails(tokenId).tokenId !=nil: "toke not registered"
                 amount + Controller.getTokenDetails(tokenId).issuedSupply <= Controller.getTokenDetails(tokenId).maxSupply : "Max supply reached"
                 SocialToken.adminRef.borrow() !=nil: "social token does not have controller capability"
             }
-            var remainingFUSD = 0.0
+            var remainingUSDC = 0.0
             var remainingSocialToken = 0.0
             let mintPrice = SocialToken.getMintPrice(tokenId, amount)
             let mintedTokenPrice = SocialToken.getMintPrice(tokenId, 1.0)
-            assert(fusdPayment.balance >= mintPrice, message: "You don't have sufficient balance to mint tokens")
-            var totalPayment = fusdPayment.balance
+            assert(usdcPayment.balance >= mintPrice, message: "You don't have sufficient balance to mint tokens")
+            var totalPayment = usdcPayment.balance
             assert(totalPayment>=mintPrice, message: "No payment yet")
             let extraAmount = totalPayment-mintPrice
             if(extraAmount > 0.0) {
                 //Create Vault of extra amount and deposit back to user
                 totalPayment=totalPayment-extraAmount
-                let remainingAmountVault <- fusdPayment.withdraw(amount: extraAmount)
+                let remainingAmountVault <- usdcPayment.withdraw(amount: extraAmount)
                 let remainingVault = receiverVault.borrow()!
                 remainingVault.deposit(from: <- remainingAmountVault)
             }
@@ -239,7 +243,7 @@ pub contract SocialToken: FungibleToken {
             tempraryVar.setTokenId(tokenId)
             let tokenDetails = Controller.getTokenDetails(tokenId)
             SocialToken.adminRef.borrow()!.incrementIssuedSupply(tokenId, amount)
-            let remainingAmount <- SocialToken.distributeFee(tokenId, <- fusdPayment)
+            let remainingAmount <- SocialToken.distributeFee(tokenId, <- usdcPayment)
             SocialToken.totalSupply = SocialToken.totalSupply + amount
             
             SocialToken.adminRef.borrow()!.incrementReserve(tokenId, remainingAmount.balance)
@@ -287,28 +291,44 @@ pub contract SocialToken: FungibleToken {
         
         self.adminRef = adminPrivateCap
         
-        let vault <-FUSD.createEmptyVault()
-        self.account.save(<-vault, to:/storage/fusdVault)
-        
-        self.account.link<&FUSD.Vault{FungibleToken.Receiver}>(
-            /public/fusdReceiver,
-            target: /storage/fusdVault
+        let vault <-FiatToken.createEmptyVault()
+        // self.account.save(<-vault, to:FiatToken.VaultStoragePath)
+        self.account.save(<-vault, to: FiatToken.VaultStoragePath)
+
+          // Create a public capability to the Vault that only exposes
+        // the deposit function through the Receiver interface
+         self.account.link<&FiatToken.Vault{FungibleToken.Receiver}>(
+            FiatToken.VaultReceiverPubPath,
+            target: FiatToken.VaultStoragePath
         )
-        
-        self.account.link<&FUSD.Vault{FungibleToken.Balance}>(
-            /public/fusdBalance,
-            target: /storage/fusdVault
+
+        // Create a public capability to the Vault that only exposes
+        // the UUID() function through the VaultUUID interface
+         self.account.link<&FiatToken.Vault{FiatToken.ResourceId}>(
+            FiatToken.VaultUUIDPubPath,
+            target: FiatToken.VaultStoragePath
         )
-        
-        self.account.link<&FUSD.Vault{FungibleToken.Provider}>(
-            /private/fusdProvider,
-            target: /storage/fusdVault
+
+        // Create a public capability to the Vault that only exposes
+        // the balance field through the Balance interface
+         self.account.link<&FiatToken.Vault{FungibleToken.Balance}>(
+            FiatToken.VaultBalancePubPath,
+            target: FiatToken.VaultStoragePath
         )
-        
-        self.collateralPool = FUSDPool(
-            _receiver: self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver),
-            _provider: self.account.getCapability<&FUSD.Vault{FungibleToken.Provider}>(/private/fusdProvider),
-            _balance : self.account.getCapability<&FUSD.Vault{FungibleToken.Balance}>(/public/fusdBalance)
+
+         // Create a private capability to the Vault that only exposes
+        // the balance field through the Balance interface
+          self.account.link<&FiatToken.Vault{FungibleToken.Provider}>(
+            /private/usdcProvider,
+            target: FiatToken.VaultStoragePath
+        )
+
+
+        self.collateralPool = USDCPool(
+            _receiver: self.account.getCapability<&FiatToken.Vault{FungibleToken.Receiver}>(FiatToken.VaultReceiverPubPath),
+            _provider: self.account.getCapability<&FiatToken.Vault{FungibleToken.Provider}>(/private/usdcProvider),
+            _balance : self.account.getCapability<&FiatToken.Vault{FungibleToken.Balance}>(FiatToken.VaultBalancePubPath),
+            _resourceId : self.account.getCapability<&FiatToken.Vault{FiatToken.ResourceId}>(FiatToken.VaultUUIDPubPath)
         )
         emit TokensInitialized(initialSupply:self.totalSupply)
     }
