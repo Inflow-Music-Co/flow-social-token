@@ -95,4 +95,8 @@ deploy-USDC:
 .PHONY: deploy-USDC
 deploy-USDC-socialToken:
 	go run ./tasks/deploy_usdc_social/main.go
+
 .PHONY: deploy-USDC-socialToken
+mint-burn-with-USDC-socialToken:
+	go run ./tasks/mint_burnt_and_usdc/main.go
+.PHONY: mint-burn-with-USDC-socialToken
