@@ -17,7 +17,9 @@ pub contract Controller {
     pub event registerToken(_ tokenId: String, _ symbol: String, _ maxSupply: UFix64, _ artist: Address)
     // Emitted when a Percentage of social token is updated 
     pub event updatePercentage(_ percentage: UFix64)
-    
+    // Emitted when fee for social token is updated 
+    pub event updateFeeSplitterDetail(_ tokenId: String)
+
     // Paths
     pub let AdminStoragePath: StoragePath
     pub var SocialTokenResourceStoragePath: StoragePath
@@ -97,7 +99,7 @@ pub struct TokenStructure {
         
         }
 
-        pub fun setFeeSpliterDetail(_ feeSplitterDetail: {Address: FeeStructure}) {
+        pub fun setFeeSplitterDetail(_ feeSplitterDetail: {Address: FeeStructure}) {
             pre {
             }
             self.feeSplitterDetail = feeSplitterDetail
@@ -105,10 +107,11 @@ pub struct TokenStructure {
     }
 
     pub resource interface SpecialCapability {
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address: FeeStructure}, _ artist: Address,
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
+        pub fun updateFeeSplitterDetail( _ tokenId: String, _ feeSplitterDetail: {Address: FeeStructure})
     }
 
     pub resource interface UserSpecialCapability {
@@ -123,7 +126,7 @@ pub struct TokenStructure {
     }
 
     pub resource Admin: SpecialCapability {
-        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ feeSplitterDetail: {Address:FeeStructure}, _ artist: Address,
+        pub fun registerToken( _ symbol: String, _ maxSupply: UFix64, _ artist: Address,
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath) {
@@ -140,9 +143,13 @@ pub struct TokenStructure {
                 tokenStoragePath, tokenPublicPath,
                 socialMinterStoragePath, socialMinterPublicPath,
                 socialBurnerStoragePath, socialBurnerPublicPath)
-            Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
             emit registerToken(tokenId, symbol, maxSupply, artistAddress)
         } 
+
+        pub fun updateFeeSplitterDetail( _ tokenId: String, _ feeSplitterDetail: {Address: FeeStructure}) {
+            Controller.allSocialTokens[tokenId]!.setFeeSplitterDetail(feeSplitterDetail)
+            emit updateFeeSplitterDetail(tokenId)
+        }
     }
 
     pub resource SocialTokenResource : SocialTokenResourcePublic , UserSpecialCapability {

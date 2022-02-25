@@ -87,3 +87,16 @@ mint-2000-burn-1300-tokens:
 .PHONY: mint-5000-burn-3500-tokens
 mint-5000-burn-3500-tokens:
 	go run ./tasks/mint_5000_burn_3500_tokens/main.go
+
+.PHONY: mint-5000-burn-3500-tokens
+deploy-USDC:
+	go run ./tasks/deploy/USDC.go
+
+.PHONY: deploy-USDC
+deploy-USDC-socialToken:
+	go run ./tasks/deploy_usdc_social/main.go
+
+.PHONY: deploy-USDC-socialToken
+mint-burn-with-USDC-socialToken:
+	go run ./tasks/mint_burnt_and_usdc/main.go
+.PHONY: mint-burn-with-USDC-socialToken

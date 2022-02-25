@@ -1,6 +1,7 @@
 import FungibleToken from 0xee82856bf20e2aa6
-import SocialToken from 0xf8d6e0586b0a20c7
+import SocialToken from 0x01cf0e2f2f715450
 import Controller from 0xf8d6e0586b0a20c7
+import FiatToken from 0xf8d6e0586b0a20c7
 
 
 transaction (tokenId: String, amountArtistToken: UFix64){
@@ -29,9 +30,10 @@ transaction (tokenId: String, amountArtistToken: UFix64){
 			?? panic("Could not borrow receiver reference to the recipient's Vault 2")
         let burnedTokens <-  burner.burnTokens(from: <- self.sentVault)
         let userReceiver = getAccount(self.accountAddress)
-            .getCapability(/public/fusdReceiver)
-            .borrow<&{FungibleToken.Receiver}>()
+            .getCapability(FiatToken.VaultReceiverPubPath)
+            .borrow<&FiatToken.Vault{FungibleToken.Receiver}>()
             ?? panic("Unable to borrow receiver reference")
+
         userReceiver.deposit(from: <-burnedTokens)
     }
 }
