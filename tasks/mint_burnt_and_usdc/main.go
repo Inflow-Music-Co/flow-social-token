@@ -84,8 +84,8 @@ func main() {
 	//Register Token for a new account
 	g.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("blocklister").RunPrintEventsFull()
 
-	//add setfeeSpliterDetail for given Token 
-	g.TransactionFromFile("setfeeSpliterDetail").SignProposeAndPayAs("account").StringArgument("TestSymbol_0xf3fcd2c1a78f5eee").AccountArgument("blocklister").RunPrintEventsFull()
+	//add setfeeSplitterDetail for given Token 
+	g.TransactionFromFile("setfeeSplitterDetail").SignProposeAndPayAs("account").StringArgument("TestSymbol_0xf3fcd2c1a78f5eee").AccountArgument("blocklister").RunPrintEventsFull()
 	//--------------------------------------------------//
 	//-- SETUP Admin and Add Capability of Controller --//
 	//--------------------------------------------------//

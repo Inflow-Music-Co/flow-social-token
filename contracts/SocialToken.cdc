@@ -286,7 +286,7 @@ pub contract SocialToken: FungibleToken {
     init() {
         self.totalSupply = 0.0
 
-          var adminPrivateCap = self.account.getCapability
+        var adminPrivateCap = self.account.getCapability
             <&{Controller.SocialTokenResourcePublic}>(/private/SocialTokenResourcePrivatePath)
         
         self.adminRef = adminPrivateCap

@@ -11,6 +11,6 @@ transaction (tokenId: String, artistAddress: Address){
             }
         
         
-        adminResource.updateFeeSpliterDetail(tokenId, feeSplitterDetail)
+        adminResource.updateFeeSplitterDetail(tokenId, feeSplitterDetail)
     }  
 }

@@ -18,7 +18,7 @@ pub contract Controller {
     // Emitted when a Percentage of social token is updated 
     pub event updatePercentage(_ percentage: UFix64)
     // Emitted when fee for social token is updated 
-    pub event updateFeeSpliterDetail(_ tokenId: String)
+    pub event updateFeeSplitterDetail(_ tokenId: String)
 
     // Paths
     pub let AdminStoragePath: StoragePath
@@ -99,7 +99,7 @@ pub struct TokenStructure {
         
         }
 
-        pub fun setFeeSpliterDetail(_ feeSplitterDetail: {Address: FeeStructure}) {
+        pub fun setFeeSplitterDetail(_ feeSplitterDetail: {Address: FeeStructure}) {
             pre {
             }
             self.feeSplitterDetail = feeSplitterDetail
@@ -111,7 +111,7 @@ pub struct TokenStructure {
             _ tokenStoragePath: StoragePath, _ tokenPublicPath: PublicPath,
             _ socialMinterStoragePath: StoragePath, _ socialMinterPublicPath: PublicPath,
             _ socialBurnerStoragePath: StoragePath, _ socialBurnerPublicPath: PublicPath)
-        pub fun updateFeeSpliterDetail( _ tokenId: String, _ feeSplitterDetail: {Address: FeeStructure})
+        pub fun updateFeeSplitterDetail( _ tokenId: String, _ feeSplitterDetail: {Address: FeeStructure})
     }
 
     pub resource interface UserSpecialCapability {
@@ -146,9 +146,9 @@ pub struct TokenStructure {
             emit registerToken(tokenId, symbol, maxSupply, artistAddress)
         } 
 
-        pub fun updateFeeSpliterDetail( _ tokenId: String, _ feeSplitterDetail: {Address: FeeStructure}) {
-            Controller.allSocialTokens[tokenId]!.setFeeSpliterDetail(feeSplitterDetail)
-            emit updateFeeSpliterDetail(tokenId)
+        pub fun updateFeeSplitterDetail( _ tokenId: String, _ feeSplitterDetail: {Address: FeeStructure}) {
+            Controller.allSocialTokens[tokenId]!.setFeeSplitterDetail(feeSplitterDetail)
+            emit updateFeeSplitterDetail(tokenId)
         }
     }
 
