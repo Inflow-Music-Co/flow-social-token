@@ -54,11 +54,11 @@ The Social Token is simply a fungible token at its core, free to be exchanged, t
 
 ### Controller Contract
 
-The Controller contract contains functions that are mostly acceseible only by the admin. These functions allow the admin to mint new Social Tokens, keep track of data related to all the Social Tokens and individual Social Tokens, give capabailities to users and set the FeeStructure, which determines the fee split percentages when a user mints new Socal Tokens.
+The Controller contract contains functions that are mostly accessible only by the admin. These functions allow the admin to mint new Social Tokens, keep track of data related to all the Social Tokens and individual Social Tokens, give capabailities to users and set the FeeStructure, which determines the fee split percentages when a user mints new Socal Tokens.
 
 ## Directory Structure
 
-The directoties here are organised into, contracts, scripts, transactions, unit tests and taskss.
+The directoties here are organised into, contracts, scripts, transactions, unit tests and tasks.
 
 - `contracts/` Contracts contain the source code for the Inflow Social Token contracts that are deployed to Flow.
 
@@ -100,19 +100,13 @@ go mod init example.com/test-gwtf
 go get github.com/bjartek/go-with-the-flow/v2/gwtf
 ```
 
-Then mint fusd by running the .go task
+Then run a task by running. A full list of tasks can be found in the MakeFile.
 
 ```
-make mint-fusd
+make <taskname>
 ```
 
 You will see outputted a list of all events, deployments and scripts run during that task.
-
-In your tasks, you can build flows of transactions and user behaviour to test your flow contracts. Build your own tasks by adding to the `/tasks` file. Add this task to your Makefile and run
-
-```
-make <taskName>
-```
 
 ## Main features
 
