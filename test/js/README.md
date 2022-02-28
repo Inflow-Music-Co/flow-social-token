@@ -1,10 +1,11 @@
-
 # NodeJs Version
+
 minimum js version v12.22.7
 
 # Package Guide
+
 - `test`: Contains automated go tests for testing the functionality
-of the smart contracts.
+  of the smart contracts.
 
 # Commands to Run test Cases
 

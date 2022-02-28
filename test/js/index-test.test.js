@@ -1,5 +1,16 @@
-import path from "path"
-import { init, emulator, getAccountAddress, deployContractByName, getContractCode, getContractAddress, getTransactionCode, getScriptCode, executeScript, sendTransaction } from "flow-js-testing";
+import path from "path";
+import {
+  init,
+  emulator,
+  getAccountAddress,
+  deployContractByName,
+  getContractCode,
+  getContractAddress,
+  getTransactionCode,
+  getScriptCode,
+  executeScript,
+  sendTransaction,
+} from "flow-js-testing";
 
 jest.setTimeout(100000);
 
@@ -15,7 +26,6 @@ afterAll(async () => {
   const port = 8080;
   await emulator.stop(port);
 });
-
 
 describe("Replicate Playground Accounts", () => {
   test("Create Accounts", async () => {
@@ -40,13 +50,13 @@ describe("Replicate Playground Accounts", () => {
 });
 describe("Deployment", () => {
   test("Deploy for FUSD", async () => {
-    const name = "FUSD"
-    const to = await getAccountAddress("Bob")
-    let update = true
+    const name = "FUSD";
+    const to = await getAccountAddress("Bob");
+    let update = true;
 
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const addressMap = {
-      FungibleToken
+      FungibleToken,
     };
     let result;
     try {
@@ -60,18 +70,17 @@ describe("Deployment", () => {
       console.log(e);
     }
     expect(name).toBe("FUSD");
-
   });
   test("Deploy for Controller", async () => {
     const name = "Controller";
     const to = await getAccountAddress("Charlie");
     let update = true;
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const FUSD = await getContractAddress("FUSD");
 
     let addressMap = {
       FungibleToken,
-      FUSD
+      FUSD,
     };
     let result;
     try {
@@ -81,9 +90,8 @@ describe("Deployment", () => {
         addressMap,
         update,
       });
-    }
-    catch (e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
 
     expect(name).toBe("Controller");
@@ -92,14 +100,14 @@ describe("Deployment", () => {
     const name = "SocialToken";
     const to = await getAccountAddress("Dave");
     let update = true;
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const FUSD = await getContractAddress("FUSD");
-    const Controller = await getContractAddress("Controller")
+    const Controller = await getContractAddress("Controller");
 
     let addressMap = {
       FungibleToken,
       FUSD,
-      Controller
+      Controller,
     };
     let result;
     try {
@@ -109,9 +117,8 @@ describe("Deployment", () => {
         addressMap,
         update,
       });
-    }
-    catch (e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
 
     expect(name).toBe("SocialToken");
@@ -120,65 +127,65 @@ describe("Deployment", () => {
 
 describe("Transactions", () => {
   test("test transaction for setup admin account", async () => {
-    const name = "setup_admin_account"
-    const Dave = await getAccountAddress("Dave")
-    const signers = [Dave]
-    const Controller = await getContractAddress("Controller")
+    const name = "setup_admin_account";
+    const Dave = await getAccountAddress("Dave");
+    const signers = [Dave];
+    const Controller = await getContractAddress("Controller");
     const addressMap = {
       Controller,
-    }
+    };
     let code = await getTransactionCode({
       name,
       addressMap,
-    })
-    let txResult
-    try {
-      txResult = await sendTransaction({
-        code,
-        signers
-      })
-    } catch (e) {
-      console.log(e);
-    }
-  })
-  test("test transaction for add admin account", async () => {
-    const name = "add_admin_account"
-    const Charlie = await getAccountAddress("Charlie")
-    const signers = [Charlie]
-    const Controller = await getContractAddress("Controller")
-    const addressMap = {
-      Controller,
-    }
-    let code = await getTransactionCode({
-      name,
-      addressMap,
-    })
-    const Dave = await getAccountAddress("Dave")
-    let args = [Dave]
-    let txResult
+    });
+    let txResult;
     try {
       txResult = await sendTransaction({
         code,
         signers,
-        args
-      })
+      });
     } catch (e) {
       console.log(e);
     }
-  })
+  });
+  test("test transaction for add admin account", async () => {
+    const name = "add_admin_account";
+    const Charlie = await getAccountAddress("Charlie");
+    const signers = [Charlie];
+    const Controller = await getContractAddress("Controller");
+    const addressMap = {
+      Controller,
+    };
+    let code = await getTransactionCode({
+      name,
+      addressMap,
+    });
+    const Dave = await getAccountAddress("Dave");
+    let args = [Dave];
+    let txResult;
+    try {
+      txResult = await sendTransaction({
+        code,
+        signers,
+        args,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  });
   test("test transaction register token", async () => {
     const name = "register_token";
 
     // Import participating accounts
     const Charlie = await getAccountAddress("Charlie");
 
-    const Eve = await getAccountAddress("Eve")
+    const Eve = await getAccountAddress("Eve");
 
     // Set transaction signers
     const signers = [Charlie];
 
     // Generate addressMap from import statements
-    const Controller = await getAccountAddress("Controller")
+    const Controller = await getAccountAddress("Controller");
 
     const addressMap = {
       // FUSD,
@@ -195,7 +202,7 @@ describe("Transactions", () => {
       txResult = await sendTransaction({
         code,
         signers,
-        args
+        args,
       });
     } catch (e) {
       console.log(e);
@@ -207,14 +214,14 @@ describe("Transactions", () => {
   test("test transaction setup fusd vault", async () => {
     const name = "setup_fusd_vault";
 
-    const accountNames = ["Charlie", "Eve", "Faythe"]
+    const accountNames = ["Charlie", "Eve", "Faythe"];
     for (var i = 0; i < accountNames.length; i++) {
       // Import participating accounts
       const signer = await getAccountAddress(accountNames[i]);
       // Set transaction signers
       const signers = [signer];
       // Generate addressMap from import statements
-      const FungibleToken = "0xee82856bf20e2aa6"
+      const FungibleToken = "0xee82856bf20e2aa6";
       const FUSD = await getContractAddress("FUSD");
       const addressMap = {
         FungibleToken,
@@ -269,51 +276,17 @@ describe("Transactions", () => {
     console.log("tx Result", txResult);
     // expect(txResult[0].errorMessage).toBe("");
   });
-  test("test transaction set minter FUSD", async () => {
-    const name = "set_minter_proxy";
-
-    // Import participating accounts
-    const Bob = await getAccountAddress("Bob");
-    // Set transaction signers
-    const signers = [Bob];
-
-    // Generate addressMap from import statements
-    const FUSD = await getContractAddress("FUSD");
-
-    const addressMap = {
-      FUSD,
-    };
-    let code = await getTransactionCode({
-      name,
-      addressMap,
-    });
-    const args = [Bob];
-
-    // console.log(code);
-    let txResult;
-    try {
-      txResult = await sendTransaction({
-        code,
-        signers,
-        args
-      });
-    } catch (e) {
-      console.log(e);
-    }
-    console.log("tx Result", txResult);
-    // expect(txResult[0].errorMessage).toBe("");
-  });
   test("test transaction mint FUSD", async () => {
     const name = "mint_fusd";
 
     // Import participating accounts
     const Bob = await getAccountAddress("Bob");
-    const Eve = await getAccountAddress("Eve")
+    const Eve = await getAccountAddress("Eve");
     // Set transaction signers
     const signers = [Bob];
 
     // Generate addressMap from import statements
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const FUSD = await getContractAddress("FUSD");
 
     const addressMap = {
@@ -332,7 +305,7 @@ describe("Transactions", () => {
       txResult = await sendTransaction({
         code,
         signers,
-        args
+        args,
       });
     } catch (e) {
       console.log(e);
@@ -341,25 +314,25 @@ describe("Transactions", () => {
     // expect(txResult[0].errorMessage).toBe("");
   });
   test("test transaction setup social vault for account five", async () => {
-    const name = "setup_social_vault"
+    const name = "setup_social_vault";
 
-    const Eve = await getAccountAddress("Eve")
+    const Eve = await getAccountAddress("Eve");
 
-    const signers = [Eve]
+    const signers = [Eve];
 
-    const FungibleToken = "0xee82856bf20e2aa6"
-    const SocialToken = await getContractAddress("SocialToken")
+    const FungibleToken = "0xee82856bf20e2aa6";
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FungibleToken,
       SocialToken,
-    }
+    };
     let code = await getTransactionCode({
       name,
       addressMap,
-    })
-    const args = ["S_0x45a1763c93006ca"]
-    let txResult
+    });
+    const args = ["S_0x45a1763c93006ca"];
+    let txResult;
     try {
       txResult = await sendTransaction({
         code,
@@ -372,51 +345,51 @@ describe("Transactions", () => {
     console.log("tx Result", txResult);
   });
   test("test script for getting the mint balance of user", async () => {
-    const name = "get_social_mint_quote"
+    const name = "get_social_mint_quote";
 
-    const FungibleToken = "0xee82856bf20e2aa6"
-    const SocialToken = await getContractAddress("SocialToken")
+    const FungibleToken = "0xee82856bf20e2aa6";
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FungibleToken,
       SocialToken,
-    }
-    const Eve = await getAccountAddress("Eve")
-    const args = [10000000.0, "S_0x45a1763c93006ca"]
+    };
+    const Eve = await getAccountAddress("Eve");
+    const args = [10000000.0, "S_0x45a1763c93006ca"];
 
     let code = await getScriptCode({
       name,
       addressMap,
-    })
-    code = code.toString().replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
-      const accounts = {
-        "0x03": Charlie,
-        "0x04": Dave,
-      };
-      const name = accounts[match];
-      return `getAccount(${name})`;
     });
+    code = code
+      .toString()
+      .replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
+        const accounts = {
+          "0x03": Charlie,
+          "0x04": Dave,
+        };
+        const name = accounts[match];
+        return `getAccount(${name})`;
+      });
     const result = await executeScript({
       code,
-      args
-    })
+      args,
+    });
     console.log(result);
-
-  })
+  });
   test("test transaction mint social token for account five symbol S", async () => {
     const name = "mint_social_token";
 
     // Import participating accounts
     const Eve = await getAccountAddress("Eve");
 
-
     // Set transaction signers
     const signers = [Eve];
 
     // Generate addressMap from import statements
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const FUSD = await getContractAddress("FUSD");
-    const SocialToken = await getContractAddress("SocialToken")
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FUSD,
@@ -433,7 +406,7 @@ describe("Transactions", () => {
       txResult = await sendTransaction({
         code,
         signers,
-        args
+        args,
       });
     } catch (e) {
       console.log(e);
@@ -442,37 +415,38 @@ describe("Transactions", () => {
     // expect(txResult[0].errorMessage).toBe("");
   });
   test("test script for getting the burn balance of user", async () => {
-    const name = "get_social_burn_quote"
+    const name = "get_social_burn_quote";
 
-    const FungibleToken = "0xee82856bf20e2aa6"
-    const SocialToken = await getContractAddress("SocialToken")
+    const FungibleToken = "0xee82856bf20e2aa6";
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FungibleToken,
       SocialToken,
-    }
-    const Eve = await getAccountAddress("Eve")
-    const args = [1.0, "S_0x45a1763c93006ca"]
+    };
+    const Eve = await getAccountAddress("Eve");
+    const args = [1.0, "S_0x45a1763c93006ca"];
 
     let code = await getScriptCode({
       name,
       addressMap,
-    })
-    code = code.toString().replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
-      const accounts = {
-        "0x03": Charlie,
-        "0x04": Dave,
-      };
-      const name = accounts[match];
-      return `getAccount(${name})`;
     });
+    code = code
+      .toString()
+      .replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
+        const accounts = {
+          "0x03": Charlie,
+          "0x04": Dave,
+        };
+        const name = accounts[match];
+        return `getAccount(${name})`;
+      });
     const result = await executeScript({
       code,
-      args
-    })
+      args,
+    });
     console.log(result);
-
-  })
+  });
 
   test("test transaction burn social token for symbol S", async () => {
     const name = "burn_social_token";
@@ -480,14 +454,13 @@ describe("Transactions", () => {
     // Import participating accounts
     const Eve = await getAccountAddress("Eve");
 
-
     // Set transaction signers
     const signers = [Eve];
 
     // Generate addressMap from import statements
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const FUSD = await getContractAddress("FUSD");
-    const SocialToken = await getContractAddress("SocialToken")
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FUSD,
@@ -504,7 +477,7 @@ describe("Transactions", () => {
       txResult = await sendTransaction({
         code,
         signers,
-        args
+        args,
       });
     } catch (e) {
       console.log(e);
@@ -518,14 +491,13 @@ describe("Transactions", () => {
     // Import participating accounts
     const Eve = await getAccountAddress("Eve");
 
-
     // Set transaction signers
     const signers = [Eve];
 
     // Generate addressMap from import statements
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const FungibleToken = "0xee82856bf20e2aa6";
     const FUSD = await getContractAddress("FUSD");
-    const SocialToken = await getContractAddress("SocialToken")
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FUSD,
@@ -542,7 +514,7 @@ describe("Transactions", () => {
       txResult = await sendTransaction({
         code,
         signers,
-        args
+        args,
       });
     } catch (e) {
       console.log(e);
@@ -550,70 +522,72 @@ describe("Transactions", () => {
     console.log("tx Result", txResult);
     // expect(txResult[0].errorMessage).toBe("");
   });
-})
+});
 describe("Scripts", () => {
-
   test("test script for getting the fusd vault balance of multiple accounts", async () => {
-    const name = "get_fusd_balance"
-    const FUSD = await getContractAddress("FUSD")
-    const FungibleToken = "0xee82856bf20e2aa6"
+    const name = "get_fusd_balance";
+    const FUSD = await getContractAddress("FUSD");
+    const FungibleToken = "0xee82856bf20e2aa6";
     const addressMap = {
       FUSD,
-      FungibleToken
-    }
+      FungibleToken,
+    };
     let code = await getScriptCode({
       name,
       addressMap,
-    })
-    code = code.toString().replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
-      const accounts = {
-        "0x03": Charlie,
-        "0x04": Dave,
-      };
-      const name = accounts[match];
-      return `getAccount(${name})`;
     });
-    const accountNames = ["Charlie", "Dave", "Eve", "Faythe"]
+    code = code
+      .toString()
+      .replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
+        const accounts = {
+          "0x03": Charlie,
+          "0x04": Dave,
+        };
+        const name = accounts[match];
+        return `getAccount(${name})`;
+      });
+    const accountNames = ["Charlie", "Dave", "Eve", "Faythe"];
     for (var i = 0; i < accountNames.length; i++) {
-      const signerAddress = await getAccountAddress(accountNames[i])
-      const args = [signerAddress]
+      const signerAddress = await getAccountAddress(accountNames[i]);
+      const args = [signerAddress];
       const result = await executeScript({
         code,
         args,
-      })
+      });
       console.log(result);
     }
-  })
+  });
   test("test script for getting the social vault balance of user", async () => {
-    const name = "get_social_balance"
+    const name = "get_social_balance";
 
-    const FungibleToken = "0xee82856bf20e2aa6"
-    const SocialToken = await getContractAddress("SocialToken")
+    const FungibleToken = "0xee82856bf20e2aa6";
+    const SocialToken = await getContractAddress("SocialToken");
 
     const addressMap = {
       FungibleToken,
       SocialToken,
-    }
-    const Eve = await getAccountAddress("Eve")
-    const args = [Eve, "S_0x45a1763c93006ca"]
+    };
+    const Eve = await getAccountAddress("Eve");
+    const args = [Eve, "S_0x45a1763c93006ca"];
 
     let code = await getScriptCode({
       name,
       addressMap,
-    })
-    code = code.toString().replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
-      const accounts = {
-        "0x03": Charlie,
-        "0x04": Dave,
-      };
-      const name = accounts[match];
-      return `getAccount(${name})`;
     });
+    code = code
+      .toString()
+      .replace(/(?:getAccount\(\s*)(0x.*)(?:\s*\))/g, (_, match) => {
+        const accounts = {
+          "0x03": Charlie,
+          "0x04": Dave,
+        };
+        const name = accounts[match];
+        return `getAccount(${name})`;
+      });
     const result = await executeScript({
       code,
-      args
-    })
+      args,
+    });
     console.log(result);
-
-  })
-})
+  });
+});
