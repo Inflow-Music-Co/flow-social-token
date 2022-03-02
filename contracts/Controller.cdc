@@ -35,7 +35,7 @@ pub struct TokenStructure {
         pub var maxSupply: UFix64
         pub var artist: Address
         pub var slope: UFix64
-        pub var feeSplitterDetail: {Address: FeeStructure}
+        access(contract) var feeSplitterDetail: {Address: FeeStructure}
         pub var reserve: UFix64
         pub var tokenResourceStoragePath: StoragePath
         pub var tokenResourcePublicPath: PublicPath
@@ -103,6 +103,10 @@ pub struct TokenStructure {
             pre {
             }
             self.feeSplitterDetail = feeSplitterDetail
+        }
+
+        pub fun getFeeSplitterDetail(): {Address: FeeStructure}{
+            return self.feeSplitterDetail           
         }
     }
 
