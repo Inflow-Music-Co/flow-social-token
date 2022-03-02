@@ -146,9 +146,11 @@ pub contract SocialToken: FungibleToken {
     access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
         let amount = fusdPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
-        for address in tokenDetails.feeSplitterDetail.keys {
-            let feeStructer = tokenDetails.feeSplitterDetail[address]
-            let tempAmmount = amount * feeStructer!.percentage
+        let detailData = tokenDetails.getFeeSplitterDetail()
+        for address in detailData.keys {
+            let feeStructuredetail = tokenDetails.getFeeSplitterDetail()
+            let feeStructure = feeStructuredetail[address]
+            let tempAmmount = amount * feeStructure!.percentage
             let tempraryVault <- fusdPayment.withdraw(amount:tempAmmount)
             let account = getAccount(address)
             let depositSigner= account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
