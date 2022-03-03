@@ -49,6 +49,9 @@ func main() {
 	//Register Token for a new account
 	flow.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("1000.00").AccountArgument("first").RunPrintEventsFull()
 
+	//add setfeeSplitterDetail for given Token
+	flow.TransactionFromFile("setfeeSplitterDetail").SignProposeAndPayAs("account").StringArgument("TestSymbol_0x1cf0e2f2f715450").AccountArgument("first").RunPrintEventsFull()
+	
 	//--------------------------------------------------//
 	//-- SETUP Admin and Add Capability of Controller --//
 	//--------------------------------------------------//
