@@ -147,6 +147,8 @@ pub contract SocialToken: FungibleToken {
         let amount = fusdPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
         let detailData = tokenDetails.getFeeSplitterDetail()
+        
+        assert(detailData.length < 10, message: "Maximum Limit Reached. Please update Fee Structure")
         for address in detailData.keys {
             let feeStructuredetail = tokenDetails.getFeeSplitterDetail()
             let feeStructure = feeStructuredetail[address]
