@@ -19,7 +19,7 @@ pub contract SocialToken: FungibleToken {
     // a variable that store admin capability to utilize methods of controller contract
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
     // a variable which will store the structure of USDCPool
-    pub var collateralPool: USDCPool
+    access(contract) var collateralPool: USDCPool
 
     pub resource interface SocialTokenPublic {
         pub fun getTokenId(): String 
