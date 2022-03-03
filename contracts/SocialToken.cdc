@@ -19,7 +19,7 @@ pub contract SocialToken: FungibleToken {
     // a variable that store admin capability to utilize methods of controller contract
     access(contract) let adminRef : Capability<&{Controller.SocialTokenResourcePublic}>
     // a variable which will store the structure of FUSDPool
-    pub var collateralPool: FUSDPool
+    access(contract) var collateralPool: FUSDPool
 
     pub resource interface SocialTokenPublic {
         pub fun getTokenId(): String 
@@ -146,9 +146,13 @@ pub contract SocialToken: FungibleToken {
     access(contract) fun distributeFee(_ tokenId : String, _ fusdPayment: @FungibleToken.Vault): @FungibleToken.Vault {
         let amount = fusdPayment.balance
         let tokenDetails = Controller.getTokenDetails(tokenId)
-        for address in tokenDetails.feeSplitterDetail.keys {
-            let feeStructer = tokenDetails.feeSplitterDetail[address]
-            let tempAmmount = amount * feeStructer!.percentage
+        let detailData = tokenDetails.getFeeSplitterDetail()
+        
+        assert(detailData.length < 10, message: "Maximum Limit Reached. Please update Fee Structure")
+        for address in detailData.keys {
+            let feeStructuredetail = tokenDetails.getFeeSplitterDetail()
+            let feeStructure = feeStructuredetail[address]
+            let tempAmmount = amount * feeStructure!.percentage
             let tempraryVault <- fusdPayment.withdraw(amount:tempAmmount)
             let account = getAccount(address)
             let depositSigner= account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
