@@ -36,17 +36,16 @@ func main() {
 	// First Account Mints and deposits in one transaction
 	flow.TransactionFromFile("mint_fusd").SignProposeAndPayAs("first").UFix64Argument("2500000000.00").AccountArgument("second").RunPrintEventsFull()
 
-
 	//-------------------------------------------------//
 	//--------- Register Account -----------//
 	//-------------------------------------------------//
 
 	//Register Token for a new account
 	flow.TransactionFromFile("register_token").SignProposeAndPayAs("account").StringArgument("TestSymbol").UFix64Argument("10000000.00").AccountArgument("first").RunPrintEventsFull()
-	
-	//add setfeeSplitterDetail for given Token 
+
+	//add setfeeSplitterDetail for given Token
 	flow.TransactionFromFile("setfeeSplitterDetail").SignProposeAndPayAs("account").StringArgument("TestSymbol_0x1cf0e2f2f715450").AccountArgument("first").RunPrintEventsFull()
-	
+
 	//--------------------------------------------------//
 	//-- SETUP Admin and Add Capability of Controller --//
 	//--------------------------------------------------//
@@ -64,11 +63,11 @@ func main() {
 
 	mintQuote := flow.ScriptFromFile("get_social_mint_quote").UFix64Argument("10000000.00").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf(" ------ Social Mint Quote ----- %s", mintQuote)
-	
+
 	//Log balance
 	fusdFirstAccountBalance := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
 	log.Printf("FUSD balance of account 'first account' %s", fusdFirstAccountBalance)
-	
+
 	// mint social Tokens
 	flow.TransactionFromFile("mint_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("10000000.00").UFix64Argument(mintQuote.String()).RunPrintEventsFull()
 
@@ -94,11 +93,11 @@ func main() {
 
 	// burn social Tokens
 	flow.TransactionFromFile("burn_social_token").SignProposeAndPayAs("second").StringArgument("TestSymbol_0x1cf0e2f2f715450").UFix64Argument("10000000.00000000").RunPrintEventsFull()
-	
+
 	//reserve before burning social tokens
 	reserve = flow.ScriptFromFile("get_reserve").StringArgument("TestSymbol_0x1cf0e2f2f715450").RunFailOnError()
 	log.Printf(" ------ reserve after buring social tokens----- %s", reserve)
-	
+
 	// Get the balance of all accounts
 	ArtistAccountBalanceFUSD := flow.ScriptFromFile("get_fusd_balance").AccountArgument("second").RunFailOnError()
 	log.Printf(" ------ User FUSD Balance after burning ----- %s", ArtistAccountBalanceFUSD)

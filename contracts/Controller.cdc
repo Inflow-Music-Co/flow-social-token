@@ -22,13 +22,13 @@ pub contract Controller {
 
     // Paths
     pub let AdminStoragePath: StoragePath
-    pub var SocialTokenResourceStoragePath: StoragePath
+    pub let SocialTokenResourceStoragePath: StoragePath
 
     pub let SpecialCapabilityPrivatePath: PrivatePath
     pub let SocialTokenResourcePrivatePath: PrivatePath
 
     // A structure that contains all the data related to the Token 
-pub struct TokenStructure {
+    pub struct TokenStructure {
         pub var tokenId: String
         pub var symbol: String
         pub var issuedSupply: UFix64
@@ -73,7 +73,7 @@ pub struct TokenStructure {
             emit incrementReserve(newReserve)
         }
 
-        pub fun decrementReserve(_ newReserve: UFix64){
+        pub fun decrementReserve(_ newReserve: UFix64) {
             pre {
                 newReserve != nil: "reserve must not be null"
                 newReserve > 0.0 : "reserve must be greater than zero"
