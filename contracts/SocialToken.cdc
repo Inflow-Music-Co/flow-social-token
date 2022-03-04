@@ -1,5 +1,5 @@
 import FungibleToken from 0xf233dcee88fe0abe
-import Controller from 0xf8d6e0586b0a20c7
+import Controller from 0x85f4c53e9a2cdeee
 import FUSD from 0x3c5959b568896393
 
 pub contract SocialToken: FungibleToken {
