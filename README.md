@@ -238,4 +238,4 @@ The works in this repository are under the Unlicence
 
 # deployments
 
-Both contracts are deployed to the testnet address `0x35a9222cca31c019`
+Both contracts are deployed to the mainnet address `0x85f4c53e9a2cdeee`
