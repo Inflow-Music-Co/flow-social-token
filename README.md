@@ -238,4 +238,6 @@ The works in this repository are under the Unlicence
 
 # deployments
 
-Both contracts are deployed to the mainnet address `0x85f4c53e9a2cdeee`
+Both contracts are deployed to one account
+mainnet: `0x85f4c53e9a2cdeee`
+testnet: `0x35a9222cca31c019`
